@@ -218,6 +218,12 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
         }
     }
 
+    /** Nome mostrado no jogo: "Dragão Verdejante", "Peaks Dragon", etc. */
+    @Override
+    protected Component getTypeName() {
+        return Component.translatable(this.getType().getDescriptionId() + "." + this.getVariant().getSerializedName());
+    }
+
     // ---------------------------------------------------------------- spawn e gravação
 
     @Override

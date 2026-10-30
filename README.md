@@ -17,11 +17,11 @@ Precisa de um JDK 25.
 
 | Dragão | Onde aparece | Sopro |
 |---|---|---|
-| Verde | Ninhos nas Cavernas Verdejantes | Veneno |
-| Amarelo | Ninhos no topo das montanhas (picos) | Elétrico (lentidão) |
-| Vermelho | Ninhos nas Badlands | Fogo (queima a terra) |
-| Cinzento | 15% por vaga de raid e 10% nos postos avançados, montado por um Pillager | Escuridão |
-| Ancião do Nether | Ninho antigo e raro no Nether (vida e dano x1,5) | Fogo de almas e definhamento |
+| Verdejante (Verdant) | Ninhos nas Cavernas Verdejantes | Veneno |
+| Dos Picos (Peaks) | Ninhos no topo das montanhas (picos) | Elétrico (lentidão) |
+| Áridas (Badlands) | Ninhos nas Badlands | Fogo (queima a terra) |
+| Saqueador (Raider) | 15% por vaga de raid e 10% nos postos avançados, montado por um Pillager | Escuridão |
+| Ancião do Nether (Nether Ancient) | Ninho antigo e raro no Nether (vida e dano x1,5) | Fogo de almas e definhamento |
 
 - **Machos**: 240 de vida (120 corações) e cornos. **Fêmeas**: 200 de vida e mais dano.
 - Todos são imunes a fogo, lava e magma.
