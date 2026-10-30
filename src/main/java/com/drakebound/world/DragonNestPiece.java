@@ -219,24 +219,28 @@ public class DragonNestPiece extends StructurePiece {
         }
     }
 
-    /** Fêmeas guardam 1 a 3 ovos sobre o magma central; 30% das vezes já há uma cria. */
+    /** Probabilidades de 0 e de até 1 ovo (cumulativas); o resto são 2 ovos. */
+    private static final float NO_EGG_CHANCE = 0.37F;
+    private static final float ONE_EGG_CHANCE = 0.97F;
+
+    /** Fêmeas guardam 0 a 2 ovos sobre o magma central (37% / 60% / 3%); 30% das vezes também há uma cria. */
     private void placeEggsOrHatchling(WorldGenLevel level, BoundingBox chunkBox, RandomSource rng) {
         boolean hatchling = rng.nextFloat() < 0.3F;
-        int eggs = 1 + rng.nextInt(3);
+        float roll = rng.nextFloat();
+        int eggs = roll < NO_EGG_CHANCE ? 0 : roll < ONE_EGG_CHANCE ? 1 : 2;
         if (!chunkBox.isInside(this.center)) {
             return;
         }
         if (hatchling) {
-            this.spawnDragon(level, this.center, rng, rng.nextBoolean(), true);
-            return;
+            this.spawnDragon(level, this.center.offset(2, 1, 2), rng, rng.nextBoolean(), true);
         }
         DragonEggBlock egg = ModRegistries.EGG_BLOCKS.get(this.variant).get();
-        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        // Posições fixas e distintas para os dois ovos não caírem no mesmo bloco.
         for (int i = 0; i < eggs; i++) {
-            pos.set(this.center.getX() + rng.nextInt(3) - 1, this.center.getY(), this.center.getZ() + rng.nextInt(3) - 1);
+            BlockPos pos = this.center.offset(i, 0, 0);
             if (level.getBlockState(pos).isAir()) {
                 level.setBlock(pos, egg.defaultBlockState(), Block.UPDATE_CLIENTS);
-                DragonEggBlock.scheduleCheck(level, pos.immutable(), egg, rng);
+                DragonEggBlock.scheduleCheck(level, pos, egg, rng);
             }
         }
     }
