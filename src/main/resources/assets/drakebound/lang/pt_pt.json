@@ -28,8 +28,8 @@
   "entity.drakebound.dragon.red": "Dragão Áridas",
   "entity.drakebound.dragon.grey": "Dragão Saqueador",
   "entity.drakebound.dragon.nether_elder": "Dragão Ancião do Nether",
-  "block.drakebound.ender_dragon_egg": "Ovo de Dragão do End",
-  "item.drakebound.ender_dragon_spawn_egg": "Ovo de Invocação de Dragão do End",
-  "item.drakebound.ender_dragon_scale": "Escama de Dragão do End",
-  "entity.drakebound.dragon.ender": "Dragão do End"
+  "block.drakebound.ender_dragon_egg": "Ovo de Dragão do Ender",
+  "item.drakebound.ender_dragon_spawn_egg": "Ovo de Invocação de Dragão do Ender",
+  "item.drakebound.ender_dragon_scale": "Escama de Dragão do Ender",
+  "entity.drakebound.dragon.ender": "Dragão do Ender"
 }

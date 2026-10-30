@@ -21,7 +21,7 @@ Precisa de um JDK 25.
 | Dos Picos (Peaks) | Ninhos no topo das montanhas (picos) | Elétrico (lentidão) |
 | Áridas (Badlands) | Ninhos nas Badlands | Fogo (queima a terra) |
 | Saqueador (Raider) | 15% por vaga de raid e 10% nos postos avançados, montado por um Pillager | Escuridão |
-| Do End (End Dragon) | Ninho único na ilha principal do End, fora dos pilares | Levitação (vida e dano x1,2) |
+| Do Ender (Ender Dragon) | Ninho único na ilha principal do End, fora dos pilares | Levitação (vida e dano x1,2) |
 | Ancião do Nether (Nether Ancient) | Ninho antigo e raro no Nether (vida e dano x1,5) | Fogo de almas e definhamento |
 
 - **Machos**: 240 de vida (120 corações) e cornos. **Fêmeas**: 200 de vida e mais dano.
