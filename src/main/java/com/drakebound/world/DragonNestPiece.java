@@ -35,7 +35,8 @@ import net.minecraft.world.level.storage.loot.LootTable;
  * Cada chamada só percorre as colunas do chunk atual.
  */
 public class DragonNestPiece extends StructurePiece {
-    private static final int CLEAR_HEIGHT = 5;
+    /** Espaço livre por cima da plataforma para os dragões se mexerem (também abre a gruta nos ninhos subterrâneos). */
+    private static final int CLEAR_HEIGHT = 10;
 
     private final DragonVariant variant;
     private final boolean male;
