@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "drakebound:ender_dragon_egg"
+          "name": "minecraft:dragon_egg"
         }
       ],
       "conditions": [

@@ -1,7 +1,3 @@
 {
-  "parent": "minecraft:block/dragon_egg",
-  "textures": {
-    "all": "drakebound:block/ender_dragon_egg",
-    "particle": "drakebound:block/ender_dragon_egg"
-  }
+  "parent": "minecraft:block/dragon_egg"
 }

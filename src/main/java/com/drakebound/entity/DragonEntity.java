@@ -655,7 +655,7 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
     @Override
     public void spawnChildFromBreeding(ServerLevel level, Animal partner) {
         DragonEntity mother = this.isMale() ? (DragonEntity) partner : this;
-        mother.spawnAtLocation(level, new ItemStack(ModRegistries.EGG_ITEMS.get(this.getVariant()).get()));
+        mother.spawnAtLocation(level, new ItemStack(ModRegistries.eggItem(this.getVariant())));
         this.finalizeSpawnChildFromBreeding(level, partner, null);
     }
 

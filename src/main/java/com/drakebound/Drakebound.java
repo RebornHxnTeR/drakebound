@@ -1,6 +1,7 @@
 package com.drakebound;
 
 import com.drakebound.entity.DragonEntity;
+import com.drakebound.event.EnderEggEvents;
 import com.drakebound.event.GreyDragonEvents;
 import com.drakebound.network.BreathPayload;
 import com.drakebound.registry.ModRegistries;
@@ -19,6 +20,7 @@ public final class Drakebound {
         modBus.addListener(Drakebound::onAttributes);
         modBus.addListener(Drakebound::onRegisterPayloads);
         NeoForge.EVENT_BUS.addListener(GreyDragonEvents::onEntityJoin);
+        NeoForge.EVENT_BUS.addListener(EnderEggEvents::onBlockPlaced);
     }
 
     private static void onAttributes(EntityAttributeCreationEvent event) {

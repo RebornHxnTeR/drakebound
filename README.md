@@ -28,6 +28,7 @@ Precisa de um JDK 25.
 - Todos são imunes a fogo, lava e magma.
 - **Ninhos**: plataforma irregular de Terra Queimada com barro compactado, terra infértil, terra enraizada, magma e blocos de ouro, ferro e cobre brutos, pilares em ruína e 1 a 2 baús de tesouro. Os machos guardam mais minério e as fêmeas guardam ovos (ou uma cria) sobre o magma central. Os dragões selvagens atacam quem se aproxima do ninho.
 - **Terra Queimada**: forma-se quando um dragão de fogo sopra durante muito tempo sobre terra.
+- **Ovo do Ender Dragon do jogo**: colocado com calor ao lado, choca uma cria do Dragão do Ender domesticável.
 - **Ovos**: chocam com calor encostado (fogo, lava, magma, fogueira acesa), em cerca de 10 minutos. Ao nascer, o dono é o jogador mais próximo num raio de 16 blocos.
 - **Domesticação**: só crias. Sem dono, domestica-se com carne crua, com 5% de rejeição por tentativa. Adultos selvagens não se domesticam.
 - **Crescimento**: cria, juvenil e adulto (3 dias de jogo, mais rápido a dar carne crua).

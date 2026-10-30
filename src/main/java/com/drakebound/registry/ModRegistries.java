@@ -68,7 +68,10 @@ public final class ModRegistries {
             DeferredBlock<DragonEggBlock> egg = BLOCKS.registerBlock(name + "_dragon_egg", p -> new DragonEggBlock(variant, p),
                 p -> p.mapColor(MapColor.COLOR_BLACK).strength(3.0F, 9.0F).lightLevel(s -> 1).noOcclusion().sound(SoundType.METAL));
             EGG_BLOCKS.put(variant, egg);
-            EGG_ITEMS.put(variant, ITEMS.registerSimpleBlockItem(egg, p -> p.rarity(Rarity.EPIC).stacksTo(16)));
+            // O ovo do Dragão do Ender é o ovo do próprio jogo; o bloco do mod só existe enquanto choca.
+            if (variant != DragonVariant.ENDER) {
+                EGG_ITEMS.put(variant, ITEMS.registerSimpleBlockItem(egg, p -> p.rarity(Rarity.EPIC).stacksTo(16)));
+            }
             SCALES.put(variant, ITEMS.registerSimpleItem(name + "_dragon_scale", p -> p.rarity(Rarity.RARE)));
             CompoundTag data = new CompoundTag();
             data.putString(DragonEntity.TAG_VARIANT, name);
@@ -100,6 +103,11 @@ public final class ModRegistries {
                 SPAWN_EGGS.values().forEach(output::accept);
             })
             .build());
+    }
+
+    /** Item do ovo de cada variante; o Dragão do Ender usa o ovo do Ender Dragon do jogo. */
+    public static Item eggItem(DragonVariant variant) {
+        return variant == DragonVariant.ENDER ? net.minecraft.world.item.Items.DRAGON_EGG : EGG_ITEMS.get(variant).get();
     }
 
     public static DragonSaddleItem saddleItem(SaddleType type) {
