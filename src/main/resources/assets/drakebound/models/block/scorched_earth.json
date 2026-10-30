@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "drakebound:block/scorched_earth_top",
+    "side": "drakebound:block/scorched_earth_side",
+    "bottom": "minecraft:block/dirt",
+    "particle": "drakebound:block/scorched_earth_side"
+  }
+}

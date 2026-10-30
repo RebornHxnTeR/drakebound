@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "drakebound:item/double_dragon_saddle"
+  }
+}

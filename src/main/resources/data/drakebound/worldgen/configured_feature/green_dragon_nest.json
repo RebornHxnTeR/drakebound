@@ -1,0 +1,7 @@
+{
+  "type": "drakebound:dragon_nest",
+  "config": {
+    "variant": "green",
+    "chance": 0.25
+  }
+}

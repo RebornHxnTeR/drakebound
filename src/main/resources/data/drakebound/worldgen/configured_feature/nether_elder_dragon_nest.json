@@ -1,0 +1,7 @@
+{
+  "type": "drakebound:dragon_nest",
+  "config": {
+    "variant": "nether_elder",
+    "chance": 0.1
+  }
+}

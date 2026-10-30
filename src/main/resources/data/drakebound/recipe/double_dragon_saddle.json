@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "SIS",
+    "LBL"
+  ],
+  "key": {
+    "S": "drakebound:dragon_saddle",
+    "I": "minecraft:iron_ingot",
+    "L": "minecraft:leather",
+    "B": "minecraft:iron_block"
+  },
+  "result": {
+    "id": "drakebound:double_dragon_saddle",
+    "count": 1
+  }
+}

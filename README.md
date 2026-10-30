@@ -1,0 +1,41 @@
+<p align="center"><img src="docs/logo.png" width="320" alt="Drakebound"></p>
+
+# Drakebound
+
+*From the nest to the skies.* Mod de dragões para Minecraft **26.1.2** (NeoForge **26.1.2.125**, Java 25).
+
+## Compilar
+
+```bash
+./gradlew build          # jar em build/libs/
+./gradlew runClient      # abre o jogo com o mod
+```
+
+Precisa de um JDK 25.
+
+## O que já existe
+
+| Dragão | Onde aparece | Sopro |
+|---|---|---|
+| Verde | Ninhos nas Cavernas Verdejantes | Veneno |
+| Amarelo | Ninhos no topo das montanhas (picos) | Elétrico (lentidão) |
+| Vermelho | Ninhos nas Badlands | Fogo (queima a terra) |
+| Cinzento | 15% por vaga de raid e 10% nos postos avançados, montado por um Pillager | Escuridão |
+| Ancião do Nether | Ninho antigo e raro no Nether (vida e dano x1,5) | Fogo de almas e definhamento |
+
+- **Machos**: 240 de vida (120 corações) e cornos. **Fêmeas**: 200 de vida e mais dano.
+- Todos são imunes a fogo, lava e magma.
+- **Ninhos**: plataforma irregular de Terra Queimada com barro compactado, terra infértil, terra enraizada, magma e blocos de ouro, ferro e cobre brutos, pilares em ruína e 1 a 2 baús de tesouro. Os machos guardam mais minério e as fêmeas guardam ovos (ou uma cria) sobre o magma central. Os dragões selvagens atacam quem se aproxima do ninho.
+- **Terra Queimada**: forma-se quando um dragão de fogo sopra durante muito tempo sobre terra.
+- **Ovos**: chocam com calor encostado (fogo, lava, magma, fogueira acesa), em cerca de 10 minutos. Ao nascer, o dono é o jogador mais próximo num raio de 16 blocos.
+- **Domesticação**: só crias. Sem dono, domestica-se com carne crua, com 5% de rejeição por tentativa. Adultos selvagens não se domesticam.
+- **Crescimento**: cria, juvenil e adulto (3 dias de jogo, mais rápido a dar carne crua).
+- **Reprodução**: dois dragões domesticados, adultos, da mesma cor e de sexos opostos, alimentados com maçã dourada. A fêmea põe um ovo.
+- **Caça**: os selvagens caçam galinhas, cabras, vacas e ovelhas e recuperam vida ao comer.
+- **Escamas**: cada cor larga a sua escama.
+- **Selas** de ferro (simples para 1 jogador, dupla para 2). Voo com energia: ao esgotar, o dragão plana até ao chão e tem de descansar. Tecla **R** para soprar enquanto montas.
+
+## Controlos (dono)
+
+- Clique com sela na mão: equipa a sela. Clique com a mão vazia: monta. Shift + clique com a mão vazia: tira a sela.
+- Sem sela, clique com a mão vazia: senta/levanta.

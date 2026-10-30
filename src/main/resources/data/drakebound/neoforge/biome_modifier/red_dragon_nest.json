@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#minecraft:is_badlands",
+  "features": "drakebound:red_dragon_nest",
+  "step": "surface_structures"
+}
