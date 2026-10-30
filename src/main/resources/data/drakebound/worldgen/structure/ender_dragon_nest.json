@@ -1,0 +1,15 @@
+{
+  "type": "drakebound:dragon_nest",
+  "biomes": "minecraft:the_end",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "variant": "ender",
+  "chance": 1.0,
+  "placement": "surface",
+  "fixed_position": [
+    0,
+    64,
+    -72
+  ]
+}

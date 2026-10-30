@@ -1,0 +1,12 @@
+{
+  "type": "drakebound:dragon_nest",
+  "biomes": "#minecraft:is_nether",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "variant": "nether_elder",
+  "chance": 0.1,
+  "placement": "floor",
+  "min_y": 32,
+  "max_y": 100
+}

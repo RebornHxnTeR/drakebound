@@ -1,6 +1,0 @@
-{
-  "type": "neoforge:add_features",
-  "biomes": "#minecraft:is_nether",
-  "features": "drakebound:nether_elder_dragon_nest",
-  "step": "surface_structures"
-}

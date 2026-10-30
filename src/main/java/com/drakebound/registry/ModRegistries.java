@@ -6,8 +6,8 @@ import com.drakebound.entity.DragonEntity;
 import com.drakebound.entity.DragonVariant;
 import com.drakebound.entity.SaddleType;
 import com.drakebound.item.DragonSaddleItem;
-import com.drakebound.world.DragonNestFeature;
-import com.drakebound.world.NestConfiguration;
+import com.drakebound.world.DragonNestPiece;
+import com.drakebound.world.DragonNestStructure;
 import java.util.EnumMap;
 import java.util.Map;
 import net.minecraft.core.registries.Registries;
@@ -25,7 +25,8 @@ import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.structure.StructureType;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.minecraft.world.level.material.MapColor;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
@@ -37,7 +38,8 @@ public final class ModRegistries {
     private static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(Drakebound.MOD_ID);
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Drakebound.MOD_ID);
     private static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(Registries.ENTITY_TYPE, Drakebound.MOD_ID);
-    private static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(Registries.FEATURE, Drakebound.MOD_ID);
+    private static final DeferredRegister<StructureType<?>> STRUCTURE_TYPES = DeferredRegister.create(Registries.STRUCTURE_TYPE, Drakebound.MOD_ID);
+    private static final DeferredRegister<StructurePieceType> STRUCTURE_PIECES = DeferredRegister.create(Registries.STRUCTURE_PIECE, Drakebound.MOD_ID);
     private static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Drakebound.MOD_ID);
 
     public static final DeferredHolder<EntityType<?>, EntityType<DragonEntity>> DRAGON = ENTITY_TYPES.register("dragon",
@@ -80,8 +82,10 @@ public final class ModRegistries {
     public static final DeferredItem<DragonSaddleItem> DOUBLE_SADDLE = ITEMS.registerItem("double_dragon_saddle",
         p -> new DragonSaddleItem(SaddleType.DOUBLE, p), p -> p.stacksTo(1));
 
-    public static final DeferredHolder<Feature<?>, DragonNestFeature> DRAGON_NEST = FEATURES.register("dragon_nest",
-        () -> new DragonNestFeature(NestConfiguration.CODEC));
+    public static final DeferredHolder<StructureType<?>, StructureType<DragonNestStructure>> DRAGON_NEST_STRUCTURE =
+        STRUCTURE_TYPES.register("dragon_nest", () -> () -> DragonNestStructure.CODEC);
+    public static final DeferredHolder<StructurePieceType, StructurePieceType> DRAGON_NEST_PIECE =
+        STRUCTURE_PIECES.register("dragon_nest", () -> (StructurePieceType.ContextlessType) DragonNestPiece::new);
 
     static {
         TABS.register("main", () -> CreativeModeTab.builder()
@@ -106,7 +110,8 @@ public final class ModRegistries {
         BLOCKS.register(modBus);
         ITEMS.register(modBus);
         ENTITY_TYPES.register(modBus);
-        FEATURES.register(modBus);
+        STRUCTURE_TYPES.register(modBus);
+        STRUCTURE_PIECES.register(modBus);
         TABS.register(modBus);
     }
 

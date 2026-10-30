@@ -40,3 +40,18 @@ Precisa de um JDK 25.
 
 - Clique com sela na mão: equipa a sela. Clique com a mão vazia: monta. Shift + clique com a mão vazia: tira a sela.
 - Sem sela, clique com a mão vazia: senta/levanta.
+
+## Encontrar ninhos
+
+Os ninhos são estruturas, por isso funcionam com `/locate`:
+
+```
+/locate structure drakebound:green_dragon_nest          (Cavernas Verdejantes)
+/locate structure drakebound:yellow_dragon_nest         (picos das montanhas)
+/locate structure drakebound:red_dragon_nest            (Badlands)
+/execute in minecraft:the_nether run locate structure drakebound:nether_elder_dragon_nest
+/execute in minecraft:the_end run locate structure drakebound:ender_dragon_nest
+```
+
+O Dragão Saqueador não tem ninho: aparece em raids e postos avançados (`/locate structure minecraft:pillager_outpost`).
+Os ninhos só existem em chunks novos, gerados já com o mod instalado.

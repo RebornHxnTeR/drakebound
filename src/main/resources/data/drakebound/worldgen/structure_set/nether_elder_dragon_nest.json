@@ -1,0 +1,14 @@
+{
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 640114,
+    "separation": 16,
+    "spacing": 40
+  },
+  "structures": [
+    {
+      "structure": "drakebound:nether_elder_dragon_nest",
+      "weight": 1
+    }
+  ]
+}

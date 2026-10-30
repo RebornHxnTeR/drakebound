@@ -1,0 +1,12 @@
+{
+  "type": "drakebound:dragon_nest",
+  "biomes": "minecraft:lush_caves",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "variant": "green",
+  "chance": 0.25,
+  "placement": "floor",
+  "min_y": -40,
+  "max_y": 40
+}

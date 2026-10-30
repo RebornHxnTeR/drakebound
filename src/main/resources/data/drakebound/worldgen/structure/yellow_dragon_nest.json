@@ -1,0 +1,14 @@
+{
+  "type": "drakebound:dragon_nest",
+  "biomes": [
+    "minecraft:jagged_peaks",
+    "minecraft:frozen_peaks",
+    "minecraft:stony_peaks"
+  ],
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "variant": "yellow",
+  "chance": 0.25,
+  "placement": "surface"
+}
