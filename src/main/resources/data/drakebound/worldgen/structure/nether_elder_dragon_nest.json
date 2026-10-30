@@ -3,7 +3,7 @@
   "biomes": "#minecraft:is_nether",
   "step": "surface_structures",
   "spawn_overrides": {},
-  "terrain_adaptation": "none",
+  "terrain_adaptation": "beard_box",
   "variant": "nether_elder",
   "chance": 0.1,
   "placement": "floor",

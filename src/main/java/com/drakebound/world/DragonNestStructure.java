@@ -8,6 +8,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.QuartPos;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.EmptyBlockGetter;
@@ -44,6 +45,8 @@ public class DragonNestStructure extends Structure {
             return this == SURFACE ? "surface" : "floor";
         }
     }
+
+    private static final int MAX_SLOPE = 24;
 
     private final DragonVariant variant;
     private final float chance;
@@ -91,13 +94,46 @@ public class DragonNestStructure extends Structure {
         if (y <= context.heightAccessor().getMinY() + 4) {
             return Optional.empty();
         }
+        // Bioma à altura real do ninho (os biomas são 3D: picos só existem à superfície), antes das amostras da borda.
+        if (this.fixedPosition.isEmpty() && !context.validBiome().test(context.biomeSource().getNoiseBiome(
+            QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z), context.randomState().sampler()))) {
+            return Optional.empty();
+        }
 
-        BlockPos center = new BlockPos(x, y, z);
         boolean male = random.nextBoolean();
         // Ninhos à medida de um dragão do tamanho do Ender Dragon.
         int radius = this.variant.powerMultiplier > 1.2F ? 16 + random.nextInt(3) : 12 + random.nextInt(3);
+        if (this.placement == Placement.SURFACE && this.fixedPosition.isEmpty()) {
+            y = this.lowestEdge(context, x, y, z, radius);
+            if (y == Integer.MIN_VALUE) {
+                return Optional.empty();
+            }
+        }
+        BlockPos center = new BlockPos(x, y, z);
         long seed = random.nextLong();
         return Optional.of(new GenerationStub(center, builder -> builder.addPiece(new DragonNestPiece(this.variant, male, center, radius, seed))));
+    }
+
+    /**
+     * Assenta o ninho no ponto mais baixo da borda (8 amostras): assim nunca fica no ar, e o terreno
+     * mais alto é escavado pela clareira. Em penhascos muito altos sobe um pouco e apoia-se na fundação.
+     * Devolve Integer.MIN_VALUE se o local for rejeitado.
+     */
+    private int lowestEdge(GenerationContext context, int x, int y, int z, int radius) {
+        int low = y;
+        int high = y;
+        for (int i = 0; i < 8; i++) {
+            double angle = i * Math.PI / 4.0;
+            int sx = x + (int) Math.round(Math.cos(angle) * radius);
+            int sz = z + (int) Math.round(Math.sin(angle) * radius);
+            int h = context.chunkGenerator().getBaseHeight(sx, sz, Heightmap.Types.WORLD_SURFACE_WG, context.heightAccessor(), context.randomState()) - 1;
+            low = Math.min(low, h);
+            high = Math.max(high, h);
+        }
+        // Em picos íngremes sobe até ficar no máximo MAX_SLOPE abaixo do topo; a fundação (até 24 blocos)
+        // preenche o resto por baixo. Só rejeita se nem assim o ninho ficar apoiado.
+        int base = Math.max(low, high - MAX_SLOPE);
+        return base - low > DragonNestPiece.MAX_FOUNDATION ? Integer.MIN_VALUE : base;
     }
 
     /** Desce pela coluna de ruído até encontrar ar sobre um bloco sólido. Devolve minY-1 se não houver. */

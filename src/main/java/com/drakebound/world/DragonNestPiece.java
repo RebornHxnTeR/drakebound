@@ -37,6 +37,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
 public class DragonNestPiece extends StructurePiece {
     /** Espaço livre por cima da plataforma para os dragões se mexerem (também abre a gruta nos ninhos subterrâneos). */
     private static final int CLEAR_HEIGHT = 10;
+    static final int MAX_FOUNDATION = 24;
 
     private final DragonVariant variant;
     private final boolean male;
@@ -136,6 +137,10 @@ public class DragonNestPiece extends StructurePiece {
                 }
                 for (int dy = 1; dy <= 3; dy++) {
                     level.setBlock(pos.set(x, y - dy, z), palette.base, Block.UPDATE_CLIENTS);
+                }
+                // Alicerce: continua para baixo até tocar no chão, para o ninho nunca ficar a flutuar.
+                for (int dy = 4; dy <= MAX_FOUNDATION && level.getBlockState(pos.set(x, y - dy, z)).canBeReplaced(); dy++) {
+                    level.setBlock(pos, palette.base, Block.UPDATE_CLIENTS);
                 }
                 BlockState top = Math.abs(dx) <= 1 && Math.abs(dz) <= 1 ? magma : floorBlock(this.roll(x, z, 0), scorched);
                 level.setBlock(pos.set(x, y, z), top, Block.UPDATE_CLIENTS);

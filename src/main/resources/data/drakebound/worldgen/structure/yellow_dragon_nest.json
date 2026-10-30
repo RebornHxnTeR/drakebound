@@ -7,7 +7,7 @@
   ],
   "step": "surface_structures",
   "spawn_overrides": {},
-  "terrain_adaptation": "none",
+  "terrain_adaptation": "beard_box",
   "variant": "yellow",
   "chance": 0.25,
   "placement": "surface"

@@ -185,8 +185,8 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
 
     @Override
     public float getAgeScale() {
-        // Adultos têm o tamanho do Ender Dragon; o Ancião do Nether é 25% maior.
-        return this.getStage().scale * (this.getVariant() == DragonVariant.NETHER_ELDER ? 1.25F : 1.0F);
+        // Adultos têm o tamanho do Ender Dragon; o Ancião do Nether é anão (~1,5 blocos mais baixo).
+        return this.getStage().scale * (this.getVariant() == DragonVariant.NETHER_ELDER ? 0.7F : 1.0F);
     }
 
     @Override

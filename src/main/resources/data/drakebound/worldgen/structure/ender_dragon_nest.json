@@ -3,7 +3,7 @@
   "biomes": "minecraft:the_end",
   "step": "surface_structures",
   "spawn_overrides": {},
-  "terrain_adaptation": "none",
+  "terrain_adaptation": "beard_box",
   "variant": "ender",
   "chance": 1.0,
   "placement": "surface",
