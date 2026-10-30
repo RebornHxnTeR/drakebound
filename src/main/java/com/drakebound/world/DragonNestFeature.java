@@ -7,6 +7,7 @@ import com.drakebound.entity.DragonVariant;
 import com.drakebound.registry.ModRegistries;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -19,6 +20,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -46,6 +48,7 @@ public class DragonNestFeature extends Feature<NestConfiguration> {
             case YELLOW -> new Palette(Blocks.COBBLED_DEEPSLATE.defaultBlockState(), Blocks.STONE.defaultBlockState());
             case RED, GREY -> new Palette(Blocks.BLACKSTONE.defaultBlockState(), Blocks.DIRT.defaultBlockState());
             case NETHER_ELDER -> new Palette(Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState(), Blocks.NETHERRACK.defaultBlockState());
+            case ENDER -> new Palette(Blocks.OBSIDIAN.defaultBlockState(), Blocks.END_STONE.defaultBlockState());
         };
     }
 
@@ -58,6 +61,18 @@ public class DragonNestFeature extends Feature<NestConfiguration> {
         }
         WorldGenLevel level = context.level();
         BlockPos center = context.origin().below();
+        if (config.fixedPosition().isPresent()) {
+            // Ninho único: só o chunk que contém a posição fixa o gera, à altura do terreno.
+            BlockPos fixed = config.fixedPosition().get();
+            if (SectionPos.blockToSectionCoord(fixed.getX()) != SectionPos.blockToSectionCoord(center.getX())
+                || SectionPos.blockToSectionCoord(fixed.getZ()) != SectionPos.blockToSectionCoord(center.getZ())) {
+                return false;
+            }
+            center = level.getHeightmapPos(Heightmap.Types.WORLD_SURFACE_WG, fixed).below();
+            if (level.isEmptyBlock(center)) {
+                return false;
+            }
+        }
         DragonVariant variant = config.variant();
         Palette palette = palette(variant);
         boolean elder = variant == DragonVariant.NETHER_ELDER;

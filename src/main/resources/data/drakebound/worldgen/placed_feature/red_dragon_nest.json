@@ -13,6 +13,17 @@
       "heightmap": "WORLD_SURFACE_WG"
     },
     {
+      "type": "minecraft:block_predicate_filter",
+      "predicate": {
+        "type": "minecraft:solid",
+        "offset": [
+          0,
+          -1,
+          0
+        ]
+      }
+    },
+    {
       "type": "minecraft:biome"
     }
   ]

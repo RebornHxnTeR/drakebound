@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "minecraft:the_end",
+  "features": "drakebound:ender_dragon_nest",
+  "step": "surface_structures"
+}

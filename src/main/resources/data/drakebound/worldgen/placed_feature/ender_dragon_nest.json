@@ -1,0 +1,8 @@
+{
+  "feature": "drakebound:ender_dragon_nest",
+  "placement": [
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

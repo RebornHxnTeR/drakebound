@@ -27,5 +27,9 @@
   "entity.drakebound.dragon.yellow": "Peaks Dragon",
   "entity.drakebound.dragon.red": "Badlands Dragon",
   "entity.drakebound.dragon.grey": "Raider Dragon",
-  "entity.drakebound.dragon.nether_elder": "Nether Ancient Dragon"
+  "entity.drakebound.dragon.nether_elder": "Nether Ancient Dragon",
+  "block.drakebound.ender_dragon_egg": "End Dragon Egg",
+  "item.drakebound.ender_dragon_spawn_egg": "End Dragon Spawn Egg",
+  "item.drakebound.ender_dragon_scale": "End Dragon Scale",
+  "entity.drakebound.dragon.ender": "End Dragon"
 }
