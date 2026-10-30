@@ -31,5 +31,7 @@
   "block.drakebound.ender_dragon_egg": "Ovo de Dragão",
   "item.drakebound.ender_dragon_spawn_egg": "Ovo de Invocação de Dragão do Ender",
   "item.drakebound.ender_dragon_scale": "Escama de Dragão do Ender",
-  "entity.drakebound.dragon.ender": "Dragão do Ender"
+  "entity.drakebound.dragon.ender": "Dragão do Ender",
+  "message.drakebound.breed_needs_lava": "Os dragões só se reproduzem dentro de lava",
+  "message.drakebound.egg_needs_magma": "O ovo tem de estar em cima de um bloco de magma para ser aceso"
 }

@@ -240,7 +240,6 @@ public class DragonNestPiece extends StructurePiece {
             BlockPos pos = this.center.offset(i, 0, 0);
             if (level.getBlockState(pos).isAir()) {
                 level.setBlock(pos, egg.defaultBlockState(), Block.UPDATE_CLIENTS);
-                DragonEggBlock.scheduleCheck(level, pos, egg, rng);
             }
         }
     }

@@ -31,5 +31,7 @@
   "block.drakebound.ender_dragon_egg": "Dragon Egg",
   "item.drakebound.ender_dragon_spawn_egg": "Ender Dragon Spawn Egg",
   "item.drakebound.ender_dragon_scale": "Ender Dragon Scale",
-  "entity.drakebound.dragon.ender": "Ender Dragon"
+  "entity.drakebound.dragon.ender": "Ender Dragon",
+  "message.drakebound.breed_needs_lava": "Dragons only breed while standing in lava",
+  "message.drakebound.egg_needs_magma": "The egg must sit on a magma block to be lit"
 }

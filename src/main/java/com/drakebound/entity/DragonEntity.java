@@ -601,6 +601,12 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
         }
 
         if (this.isFood(stack)) {
+            if (!this.isInLava() && this.isTame() && this.getStage() == GrowthStage.ADULT) {
+                if (server) {
+                    player.sendOverlayMessage(Component.translatable("message.drakebound.breed_needs_lava"));
+                }
+                return InteractionResult.FAIL;
+            }
             return super.mobInteract(player, hand);
         }
 
@@ -638,16 +644,17 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
 
     @Override
     public boolean canFallInLove() {
-        return this.isTame() && this.getStage() == GrowthStage.ADULT && super.canFallInLove();
+        return this.isTame() && this.getStage() == GrowthStage.ADULT && this.isInLava() && super.canFallInLove();
     }
 
-    /** Reprodução exige dois dragões domesticados, adultos, da mesma variante e de sexos opostos. */
+    /** Reprodução exige dois dragões domesticados, adultos, da mesma variante, de sexos opostos e ambos dentro de lava. */
     @Override
     public boolean canMate(Animal partner) {
         return partner instanceof DragonEntity other
             && other.isTame() && this.isTame()
             && other.isMale() != this.isMale()
             && other.getVariant() == this.getVariant()
+            && this.isInLava() && other.isInLava()
             && super.canMate(partner);
     }
 
