@@ -27,8 +27,8 @@ import net.minecraft.world.phys.AABB;
 public class DragonRenderer extends EntityRenderer<DragonEntity, DragonRenderState> {
     public static final ModelLayerLocation MALE_LAYER = new ModelLayerLocation(Identifier.fromNamespaceAndPath(Drakebound.MOD_ID, "dragon"), "male");
     public static final ModelLayerLocation FEMALE_LAYER = new ModelLayerLocation(Identifier.fromNamespaceAndPath(Drakebound.MOD_ID, "dragon"), "female");
-    /** Escala do modelo do Ender Dragon para um adulto do Drakebound. */
-    private static final float MODEL_SCALE = 0.5F;
+    /** Adultos têm exatamente o tamanho do Ender Dragon. */
+    private static final float MODEL_SCALE = 1.0F;
     /** Desce o modelo para que as patas toquem no chão (em blocos, antes da escala). */
     private static final float MODEL_Y_OFFSET = -1.0F;
 
@@ -37,7 +37,7 @@ public class DragonRenderer extends EntityRenderer<DragonEntity, DragonRenderSta
 
     public DragonRenderer(EntityRendererProvider.Context context) {
         super(context);
-        this.shadowRadius = 1.5F;
+        this.shadowRadius = 3.0F;
         this.maleModel = new EnderDragonModel(context.bakeLayer(MALE_LAYER));
         this.femaleModel = new EnderDragonModel(context.bakeLayer(FEMALE_LAYER));
         DragonTextures.rebuild(context.getResourceManager());
@@ -101,6 +101,6 @@ public class DragonRenderer extends EntityRenderer<DragonEntity, DragonRenderSta
     /** O modelo (asas e cauda) é muito maior do que a caixa de colisão. */
     @Override
     protected AABB getBoundingBoxForCulling(DragonEntity dragon) {
-        return dragon.getBoundingBox().inflate(6.0 * dragon.getAgeScale());
+        return dragon.getBoundingBox().inflate(10.0 * dragon.getAgeScale());
     }
 }

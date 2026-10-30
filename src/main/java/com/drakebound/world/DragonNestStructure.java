@@ -94,7 +94,8 @@ public class DragonNestStructure extends Structure {
 
         BlockPos center = new BlockPos(x, y, z);
         boolean male = random.nextBoolean();
-        int radius = this.variant.powerMultiplier > 1.0F ? 11 + random.nextInt(3) : 7 + random.nextInt(3);
+        // Ninhos à medida de um dragão do tamanho do Ender Dragon.
+        int radius = this.variant.powerMultiplier > 1.2F ? 16 + random.nextInt(3) : 12 + random.nextInt(3);
         long seed = random.nextLong();
         return Optional.of(new GenerationStub(center, builder -> builder.addPiece(new DragonNestPiece(this.variant, male, center, radius, seed))));
     }

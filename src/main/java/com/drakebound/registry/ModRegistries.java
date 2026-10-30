@@ -44,11 +44,11 @@ public final class ModRegistries {
 
     public static final DeferredHolder<EntityType<?>, EntityType<DragonEntity>> DRAGON = ENTITY_TYPES.register("dragon",
         id -> EntityType.Builder.of(DragonEntity::new, MobCategory.CREATURE)
-            .sized(2.5F, 2.0F)
+            .sized(5.0F, 3.5F)
             // Todos os dragões ignoram fogo, lava, magma e qualquer dano de calor.
             .fireImmune()
-            .eyeHeight(1.6F)
-            .clientTrackingRange(10)
+            .eyeHeight(2.8F)
+            .clientTrackingRange(16)
             .build(ResourceKey.create(Registries.ENTITY_TYPE, id)));
 
     /** Terra queimada: forma-se sob sopro de fogo prolongado e cobre o chão dos ninhos. */

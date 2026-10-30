@@ -78,7 +78,7 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
     private static final int STAMINA_REGEN = 3;
     private static final int BREATH_DURATION = 40;
     private static final int BREATH_COOLDOWN = 120;
-    private static final double BREATH_RANGE = 12.0;
+    private static final double BREATH_RANGE = 20.0;
     private static final double BREATH_CONE_DOT = 0.75;
     private static final float RIDDEN_FLY_ACCEL = 0.1F;
     private static final int PREY_SEARCH_INTERVAL = 300;
@@ -177,7 +177,7 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
 
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
-        if (DATA_STAGE.equals(accessor)) {
+        if (DATA_STAGE.equals(accessor) || DATA_VARIANT.equals(accessor)) {
             this.refreshDimensions();
         }
         super.onSyncedDataUpdated(accessor);
@@ -185,7 +185,8 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
 
     @Override
     public float getAgeScale() {
-        return this.getStage().scale;
+        // Adultos têm o tamanho do Ender Dragon; o Ancião do Nether é 25% maior.
+        return this.getStage().scale * (this.getVariant() == DragonVariant.NETHER_ELDER ? 1.25F : 1.0F);
     }
 
     @Override
@@ -358,7 +359,7 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
     private void tickBreath(ServerLevel level) {
         this.breathTicks--;
         Vec3 dir = this.breathDirection();
-        Vec3 mouth = this.position().add(0.0, this.getBbHeight() * 0.75, 0.0).add(dir.scale(this.getBbWidth() * 0.9));
+        Vec3 mouth = this.position().add(0.0, this.getBbHeight() * 0.75, 0.0).add(dir.scale(this.getBbWidth() * 1.2));
         DragonVariant variant = this.getVariant();
 
         if ((this.breathTicks & 1) == 0) {
