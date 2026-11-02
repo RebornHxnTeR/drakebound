@@ -1,7 +1,33 @@
 {
-  "variants": {
-    "": {
-      "model": "drakebound:block/yellow_dragon_egg"
+  "multipart": [
+    {
+      "apply": {
+        "model": "drakebound:block/yellow_dragon_egg"
+      }
+    },
+    {
+      "when": {
+        "age": "1"
+      },
+      "apply": {
+        "model": "drakebound:block/egg_crack_1"
+      }
+    },
+    {
+      "when": {
+        "age": "2"
+      },
+      "apply": {
+        "model": "drakebound:block/egg_crack_2"
+      }
+    },
+    {
+      "when": {
+        "age": "3|4"
+      },
+      "apply": {
+        "model": "drakebound:block/egg_crack_3"
+      }
     }
-  }
+  ]
 }

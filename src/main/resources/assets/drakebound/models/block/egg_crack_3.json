@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/dragon_egg",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "all": "drakebound:block/egg_crack_3",
+    "particle": "drakebound:block/egg_crack_3"
+  }
+}
