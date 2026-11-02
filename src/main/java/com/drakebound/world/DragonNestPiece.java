@@ -22,6 +22,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -40,6 +41,8 @@ public class DragonNestPiece extends StructurePiece {
     private static final int CLEAR_HEIGHT = 10;
     /** Quanto o terreno pode subir ou descer em relação ao centro; colunas fora disto ficam como estão. */
     private static final int SCAN = 12;
+    private static final float ABANDONED_CHANCE = 0.2F;
+    private static final BlockState BONE = Blocks.BONE_BLOCK.defaultBlockState();
 
     private final DragonVariant variant;
     private final boolean male;
@@ -87,9 +90,9 @@ public class DragonNestPiece extends StructurePiece {
         };
     }
 
-    /** Chão verdadeiro: ignora ar, plantas, neve e folhas. */
+    /** Chão verdadeiro: ignora ar, plantas, neve, folhas e os ossos do esqueleto (para empilhar as costelas). */
     private static boolean isGround(BlockState state) {
-        return !state.canBeReplaced() && !state.is(BlockTags.LEAVES) && !state.is(BlockTags.LOGS) && state.getFluidState().isEmpty();
+        return !state.canBeReplaced() && !state.is(Blocks.BONE_BLOCK) && !state.is(BlockTags.LEAVES) && !state.is(BlockTags.LOGS) && state.getFluidState().isEmpty();
     }
 
     /** Altura do chão natural nesta coluna (procura só SCAN blocos acima e abaixo do centro); MIN_VALUE se não houver. */
@@ -112,10 +115,16 @@ public class DragonNestPiece extends StructurePiece {
         float phaseA = rng.nextFloat() * Mth.TWO_PI;
         float phaseB = rng.nextFloat() * Mth.TWO_PI;
         boolean elder = this.variant.powerMultiplier > 1.0F;
+        boolean abandoned = this.isAbandoned();
 
-        this.buildPlatform(level, chunkBox, phaseA, phaseB, elder);
+        this.buildPlatform(level, chunkBox, phaseA, phaseB, elder, abandoned);
         this.placePillars(level, chunkBox, rng, pillar(this.variant));
         this.placeChests(level, chunkBox, rng);
+        if (abandoned) {
+            // Ninho abandonado: sem dragão nem ovos, só o esqueleto do antigo dono.
+            this.placeSkeleton(level, chunkBox);
+            return;
+        }
         if (!this.male) {
             this.placeEggsOrHatchling(level, chunkBox, rng);
         }
@@ -129,7 +138,7 @@ public class DragonNestPiece extends StructurePiece {
      * O ninho assenta no terreno tal como ele é: em cada coluna só troca o bloco do chão pelos blocos do ninho
      * e tira plantas, folhas e troncos por cima (até CLEAR_HEIGHT), sem paredes, alicerces nem escavações.
      */
-    private void buildPlatform(WorldGenLevel level, BoundingBox chunkBox, float phaseA, float phaseB, boolean elder) {
+    private void buildPlatform(WorldGenLevel level, BoundingBox chunkBox, float phaseA, float phaseB, boolean elder, boolean abandoned) {
         BlockState scorched = ModRegistries.SCORCHED_EARTH.get().defaultBlockState();
         BlockState magma = Blocks.MAGMA_BLOCK.defaultBlockState();
         BlockState air = Blocks.AIR.defaultBlockState();
@@ -166,7 +175,7 @@ public class DragonNestPiece extends StructurePiece {
                 BlockState top = Math.abs(dx) <= 1 && Math.abs(dz) <= 1 ? magma : floorBlock(this.roll(x, z, 0), scorched);
                 level.setBlock(pos.set(x, y, z), top, Block.UPDATE_CLIENTS);
                 float t = dist / edge;
-                if (t > 0.35F && t < 0.85F) {
+                if (!abandoned && t > 0.35F && t < 0.85F) {
                     BlockState treasure = treasureBlock(this.roll(x, z, 1), this.male, elder);
                     if (treasure != null) {
                         level.setBlock(pos.set(x, y + 1, z), treasure, Block.UPDATE_CLIENTS);
@@ -180,6 +189,71 @@ public class DragonNestPiece extends StructurePiece {
     private BlockPos surface(WorldGenLevel level, int x, int z) {
         int y = this.groundY(level, x, z, new BlockPos.MutableBlockPos());
         return new BlockPos(x, y == Integer.MIN_VALUE ? this.center.getY() : y, z);
+    }
+
+    /** 20% dos ninhos estão abandonados (nunca o ninho único do End). Fixo pela posição, igual em qualquer chunk. */
+    private boolean isAbandoned() {
+        return this.variant != DragonVariant.ENDER && this.roll(this.center.getX(), this.center.getZ(), 2) < ABANDONED_CHANCE;
+    }
+
+    /**
+     * Esqueleto de dragão em blocos de osso, deitado no chão do ninho: coluna, costelas, crânio, asas abertas,
+     * patas e cauda. Coordenadas relativas ao centro: s ao longo do corpo, p para o lado, h acima do chão.
+     */
+    private void placeSkeleton(WorldGenLevel level, BoundingBox chunkBox) {
+        boolean alongX = this.roll(this.center.getX(), this.center.getZ(), 3) < 0.5F;
+        int sign = this.roll(this.center.getX(), this.center.getZ(), 4) < 0.5F ? 1 : -1;
+        Direction.Axis spine = alongX ? Direction.Axis.X : Direction.Axis.Z;
+        Direction.Axis side = alongX ? Direction.Axis.Z : Direction.Axis.X;
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        // Coluna do crânio à ponta da cauda (a cauda ondula um pouco).
+        for (int s = -14; s <= 7; s++) {
+            int p = s < -7 ? Math.round(Mth.sin(s * 0.6F) * 1.5F) : 0;
+            this.bone(level, chunkBox, pos, alongX, sign, s, p, 1, spine);
+        }
+        // Costelas: arcos de 3 blocos de cada lado.
+        for (int s = -4; s <= 3; s += 2) {
+            for (int p = -1; p <= 1; p += 2) {
+                this.bone(level, chunkBox, pos, alongX, sign, s, 2 * p, 1, Direction.Axis.Y);
+                this.bone(level, chunkBox, pos, alongX, sign, s, 2 * p, 2, Direction.Axis.Y);
+                this.bone(level, chunkBox, pos, alongX, sign, s, p, 3, side);
+            }
+        }
+        // Crânio: bloco maciço de 3x3 com testa e focinho.
+        for (int s = 8; s <= 10; s++) {
+            for (int p = -1; p <= 1; p++) {
+                this.bone(level, chunkBox, pos, alongX, sign, s, p, 1, spine);
+            }
+            this.bone(level, chunkBox, pos, alongX, sign, s, 0, 2, spine);
+        }
+        this.bone(level, chunkBox, pos, alongX, sign, 11, 0, 1, spine);
+        // Asas abertas para trás, a partir dos ombros.
+        for (int k = 1; k <= 7; k++) {
+            for (int p = -1; p <= 1; p += 2) {
+                this.bone(level, chunkBox, pos, alongX, sign, 2 - k / 2, p * (2 + k), 1, side);
+            }
+        }
+        // Patas.
+        for (int s : new int[] {-5, 4}) {
+            for (int p = -1; p <= 1; p += 2) {
+                this.bone(level, chunkBox, pos, alongX, sign, s, 3 * p, 1, side);
+                this.bone(level, chunkBox, pos, alongX, sign, s + 1, 4 * p, 1, spine);
+            }
+        }
+    }
+
+    private void bone(WorldGenLevel level, BoundingBox chunkBox, BlockPos.MutableBlockPos pos, boolean alongX, int sign,
+                      int s, int p, int h, Direction.Axis axis) {
+        int x = this.center.getX() + (alongX ? s * sign : p);
+        int z = this.center.getZ() + (alongX ? p : s * sign);
+        if (!chunkBox.isInside(x, this.center.getY(), z)) {
+            return;
+        }
+        int ground = this.groundY(level, x, z, pos);
+        if (ground == Integer.MIN_VALUE) {
+            return;
+        }
+        level.setBlock(pos.set(x, ground + h, z), BONE.setValue(RotatedPillarBlock.AXIS, axis), Block.UPDATE_CLIENTS);
     }
 
     /** Número entre 0 e 1 fixo para cada coluna e canal, igual em qualquer chunk. */
