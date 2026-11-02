@@ -2,6 +2,7 @@ package com.drakebound.event;
 
 import com.drakebound.entity.DragonEntity;
 import com.drakebound.entity.DragonVariant;
+import com.drakebound.entity.SaddleType;
 import com.drakebound.registry.ModRegistries;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -71,6 +72,8 @@ public final class GreyDragonEvents {
             dragon.snapTo(pillager.getX(), pillager.getY(), pillager.getZ(), pillager.getYRot(), 0.0F);
             dragon.finalizeSpawn(level, level.getCurrentDifficultyAt(pillager.blockPosition()), EntitySpawnReason.EVENT, null);
             dragon.setVariant(DragonVariant.GREY);
+            // Montado pelo saqueador: já traz a sela de ferro (e larga-a ao morrer).
+            dragon.setSaddle(SaddleType.SINGLE);
             dragon.setPersistenceRequired();
             level.addFreshEntity(dragon);
             pillager.startRiding(dragon, true, false);

@@ -7,6 +7,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
 import net.minecraft.core.Direction;
 import net.minecraft.core.QuartPos;
 import net.minecraft.util.StringRepresentable;
@@ -31,7 +32,8 @@ public class DragonNestStructure extends Structure {
         Placement.CODEC.fieldOf("placement").forGetter(s -> s.placement),
         Codec.INT.optionalFieldOf("min_y", -64).forGetter(s -> s.minY),
         Codec.INT.optionalFieldOf("max_y", 320).forGetter(s -> s.maxY),
-        BlockPos.CODEC.optionalFieldOf("fixed_position").forGetter(s -> s.fixedPosition)
+        BlockPos.CODEC.optionalFieldOf("fixed_position").forGetter(s -> s.fixedPosition),
+        Codec.intRange(0, 128).optionalFieldOf("offset", 0).forGetter(s -> s.offset)
     ).apply(i, DragonNestStructure::new));
 
     /** SURFACE: à superfície do terreno. FLOOR: no chão de uma gruta entre min_y e max_y (Cavernas Verdejantes, Nether). */
@@ -55,9 +57,11 @@ public class DragonNestStructure extends Structure {
     private final int minY;
     private final int maxY;
     private final Optional<BlockPos> fixedPosition;
+    /** Afasta o ninho do chunk escolhido (ex.: ninho ao lado de um posto de saqueadores, que usa o mesmo chunk). */
+    private final int offset;
 
     public DragonNestStructure(StructureSettings settings, DragonVariant variant, float chance, Placement placement, int minY, int maxY,
-                               Optional<BlockPos> fixedPosition) {
+                               Optional<BlockPos> fixedPosition, int offset) {
         super(settings);
         this.variant = variant;
         this.chance = chance;
@@ -65,6 +69,7 @@ public class DragonNestStructure extends Structure {
         this.minY = minY;
         this.maxY = maxY;
         this.fixedPosition = fixedPosition;
+        this.offset = offset;
     }
 
     @Override
@@ -87,6 +92,11 @@ public class DragonNestStructure extends Structure {
             }
             x = chunk.getMinBlockX() + random.nextInt(16);
             z = chunk.getMinBlockZ() + random.nextInt(16);
+            if (this.offset > 0) {
+                float angle = random.nextFloat() * Mth.TWO_PI;
+                x += Mth.floor(Mth.cos(angle) * this.offset);
+                z += Mth.floor(Mth.sin(angle) * this.offset);
+            }
         }
 
         int y = this.placement == Placement.SURFACE

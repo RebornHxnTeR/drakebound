@@ -1,0 +1,11 @@
+{
+  "type": "drakebound:dragon_nest",
+  "biomes": "#minecraft:has_structure/pillager_outpost",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "variant": "grey",
+  "chance": 0.05,
+  "placement": "surface",
+  "offset": 56
+}

@@ -26,6 +26,7 @@ Precisa de um JDK 25.
 
 - **Machos**: 240 de vida (120 corações) e cornos. **Fêmeas**: 200 de vida e mais dano.
 - Todos são imunes a fogo, lava e magma.
+- **Ninhos do Saqueador**: 5% dos postos de saqueadores têm um ninho do Dragão Saqueador a uns 50 blocos. O Dragão Saqueador montado por um Pillager traz sela de ferro.
 - **Ninhos**: 20% estão abandonados, sem dragão nem minério, só com o esqueleto do antigo dono (blocos de osso de dragão e um crânio de dragão) e os baús. O bloco de osso de dragão faz-se com 9 ossos e partido devolve-os; o crânio pousa-se ou usa-se na cabeça. plataforma irregular de Terra Queimada com barro compactado, terra infértil, terra enraizada, magma e blocos de ouro, ferro e cobre brutos, pilares em ruína e 1 a 2 baús de tesouro. Os machos guardam mais minério e as fêmeas guardam 0 a 2 ovos (37% nenhum, 60% um, 3% dois) sobre o magma central,. Os dragões selvagens atacam quem se aproxima do ninho.
 - **Terra Queimada**: forma-se quando um dragão de fogo sopra durante muito tempo sobre terra.
 - **Ovo do Ender Dragon do jogo**: colocado em cima de magma e aceso com isqueiro, choca uma cria do Dragão do Ender domesticável.
