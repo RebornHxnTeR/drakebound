@@ -28,17 +28,22 @@ public class DrakeModel extends EnderDragonModel {
     /** Passada: frequência e amplitude (radianos) do balanço das patas. */
     private static final float STEP_FREQ = 0.35F;
     private static final float STEP_SWING = 0.35F;
-    /** De pé o corpo sobe para as patas esticadas tocarem no chão (unidades do modelo, 16 = 1 bloco). */
+    /** De pé o corpo sobe para as patas dobradas tocarem no chão (unidades do modelo, 16 = 1 bloco). */
     public static final float STAND_LIFT = DragonEntity.STAND_LIFT_UNITS;
-    /** Pata de trás dobrada em "Z": coxa para a frente, canela para trás, pé assente. */
-    private static final float HIND_BEND = 0.41F;
+    /** Pose agachada (rad): patas dobradas por baixo do corpo, pés assentes no chão. */
+    private static final float FRONT_UPPER = 1.3F;
+    private static final float FRONT_TIP = -2.34F;
+    private static final float FRONT_FOOT = 1.04F;
+    private static final float HIND_UPPER = -0.8F;
+    private static final float HIND_TIP = 1.6F;
+    private static final float HIND_FOOT = -0.8F;
     /** Patas de trás mais pequenas e patas da frente mais grossas (proporções de quadrúpede). */
     private static final float HIND_SCALE = 0.8F;
     private static final float FRONT_THICKNESS = 1.4F;
     /** Pescoço erguido em curva e cabeça direita. */
-    private static final float[] NECK_STAND = {-0.9F, -0.75F, -0.5F, -0.25F, 0.0F};
-    private static final float HEAD_STAND = 0.15F;
-    private static final float TAIL_DROOP = 0.04F;
+    private static final float[] NECK_STAND = {-0.7F, -0.45F, -0.2F, 0.0F, 0.15F};
+    private static final float HEAD_STAND = 0.05F;
+    private static final float TAIL_DROOP = -0.03F;
     private static final float SEGMENT = 10.0F;
 
     private final ModelPart saddleFront;
@@ -154,15 +159,15 @@ public class DrakeModel extends EnderDragonModel {
     /** Mistura a pose de voo (do Ender Dragon) com a pose de pé: patas por baixo do corpo, pescoço erguido. */
     private void standPose(float ground) {
         this.root.y -= STAND_LIFT * ground;
-        this.leftFrontLeg.xRot = Mth.lerp(ground, this.leftFrontLeg.xRot, 0.0F);
+        this.leftFrontLeg.xRot = Mth.lerp(ground, this.leftFrontLeg.xRot, FRONT_UPPER);
         this.rightFrontLeg.xRot = this.leftFrontLeg.xRot;
-        this.leftHindLeg.xRot = Mth.lerp(ground, this.leftHindLeg.xRot, -HIND_BEND);
+        this.leftHindLeg.xRot = Mth.lerp(ground, this.leftHindLeg.xRot, HIND_UPPER);
         this.rightHindLeg.xRot = this.leftHindLeg.xRot;
         for (int i = 0; i < 2; i++) {
-            this.frontTips[i].xRot = Mth.lerp(ground, this.frontTips[i].xRot, 0.0F);
-            this.frontFeet[i].xRot = Mth.lerp(ground, this.frontFeet[i].xRot, 0.0F);
-            this.hindTips[i].xRot = Mth.lerp(ground, this.hindTips[i].xRot, 2.0F * HIND_BEND);
-            this.hindFeet[i].xRot = Mth.lerp(ground, this.hindFeet[i].xRot, -HIND_BEND);
+            this.frontTips[i].xRot = Mth.lerp(ground, this.frontTips[i].xRot, FRONT_TIP);
+            this.frontFeet[i].xRot = Mth.lerp(ground, this.frontFeet[i].xRot, FRONT_FOOT);
+            this.hindTips[i].xRot = Mth.lerp(ground, this.hindTips[i].xRot, HIND_TIP);
+            this.hindFeet[i].xRot = Mth.lerp(ground, this.hindFeet[i].xRot, HIND_FOOT);
         }
         // Pescoço: o modelo encadeia as posições a partir das rotações, por isso recalcula-se a cadeia.
         float x = this.neck[0].x;

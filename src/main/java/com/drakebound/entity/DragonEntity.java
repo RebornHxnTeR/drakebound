@@ -113,7 +113,7 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
     public float flapTime;
     public float oFlapTime;
     /** Quanto o modelo sobe quando está de pé (unidades do modelo; 16 = 1 bloco). */
-    public static final float STAND_LIFT_UNITS = 27.0F;
+    public static final float STAND_LIFT_UNITS = 12.0F;
     /** 0 = a voar, 1 = pousado; suavizado para o modelo não saltar entre poses (só cliente). */
     public float groundAmount;
     public float oGroundAmount;
