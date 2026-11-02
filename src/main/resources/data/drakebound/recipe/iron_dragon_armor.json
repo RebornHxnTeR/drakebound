@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "X": "minecraft:iron_block",
+    "L": "minecraft:leather"
+  },
+  "pattern": [
+    "  X",
+    "XLX",
+    "X X"
+  ],
+  "result": {
+    "id": "drakebound:iron_dragon_armor"
+  }
+}

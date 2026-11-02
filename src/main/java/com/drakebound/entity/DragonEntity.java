@@ -1,5 +1,6 @@
 package com.drakebound.entity;
 
+import com.drakebound.item.DragonArmorItem;
 import com.drakebound.item.DragonSaddleItem;
 import com.drakebound.registry.ModRegistries;
 import com.drakebound.registry.ModTags;
@@ -695,12 +696,29 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
             return super.mobInteract(player, hand);
         }
 
-        // Tesoura tira a sela (como nos cavalos).
-        if (stack.is(Items.SHEARS) && this.getSaddle() != SaddleType.NONE && !this.isVehicle()) {
+        // Armadura de dragão: só adultos, uma de cada vez.
+        if (stack.getItem() instanceof DragonArmorItem && !this.isWearingBodyArmor() && this.getStage() == GrowthStage.ADULT) {
             if (server) {
-                this.spawnAtLocation((ServerLevel) this.level(), new ItemStack(ModRegistries.saddleItem(this.getSaddle())));
-                this.setSaddle(SaddleType.NONE);
-                this.playSound(SoundEvents.SADDLE_UNEQUIP.value(), 1.0F, 0.8F);
+                this.setBodyArmorItem(stack.copyWithCount(1));
+                stack.consume(1, player);
+                this.playSound(SoundEvents.HORSE_ARMOR.value(), 1.0F, 0.8F);
+            }
+            return InteractionResult.SUCCESS;
+        }
+
+        // Tesoura tira a sela (como nos cavalos); sem sela, tira a armadura.
+        if (stack.is(Items.SHEARS) && !this.isVehicle() && (this.getSaddle() != SaddleType.NONE || this.isWearingBodyArmor())) {
+            if (server) {
+                ServerLevel level = (ServerLevel) this.level();
+                if (this.getSaddle() != SaddleType.NONE) {
+                    this.spawnAtLocation(level, new ItemStack(ModRegistries.saddleItem(this.getSaddle())));
+                    this.setSaddle(SaddleType.NONE);
+                    this.playSound(SoundEvents.SADDLE_UNEQUIP.value(), 1.0F, 0.8F);
+                } else {
+                    this.spawnAtLocation(level, this.getBodyArmorItem().copy());
+                    this.setBodyArmorItem(ItemStack.EMPTY);
+                    this.playSound(SoundEvents.HORSE_ARMOR_UNEQUIP.value(), 1.0F, 0.8F);
+                }
             }
             return InteractionResult.SUCCESS;
         }

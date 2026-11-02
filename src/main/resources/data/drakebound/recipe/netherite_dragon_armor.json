@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": "#minecraft:netherite_tool_materials",
+  "base": "drakebound:diamond_dragon_armor",
+  "result": {
+    "id": "drakebound:netherite_dragon_armor"
+  },
+  "template": "minecraft:netherite_upgrade_smithing_template"
+}

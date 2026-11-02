@@ -64,5 +64,11 @@
   "block.drakebound.dragon_skull": "Crânio de Dragão",
   "message.drakebound.command.follow": "%s está a seguir-te",
   "message.drakebound.command.sit": "%s está sentado",
-  "message.drakebound.command.wander": "%s está a passear por aqui"
+  "message.drakebound.command.wander": "%s está a passear por aqui",
+  "item.drakebound.leather_dragon_armor": "Armadura de Couro para Dragão",
+  "item.drakebound.copper_dragon_armor": "Armadura de Cobre para Dragão",
+  "item.drakebound.iron_dragon_armor": "Armadura de Ferro para Dragão",
+  "item.drakebound.gold_dragon_armor": "Armadura de Ouro para Dragão",
+  "item.drakebound.diamond_dragon_armor": "Armadura de Diamante para Dragão",
+  "item.drakebound.netherite_dragon_armor": "Armadura de Netherite para Dragão"
 }

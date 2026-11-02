@@ -3,6 +3,7 @@ package com.drakebound.client;
 import com.drakebound.Drakebound;
 import com.drakebound.entity.DragonEntity;
 import com.drakebound.entity.SaddleType;
+import com.drakebound.item.DragonArmorItem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -78,6 +79,7 @@ public class DragonRenderer extends EntityRenderer<DragonEntity, DragonRenderSta
         state.variant = dragon.getVariant();
         state.male = dragon.isMale();
         state.saddle = dragon.getSaddle();
+        state.armorTexture = dragon.getBodyArmorItem().getItem() instanceof DragonArmorItem armor ? armor.texture : null;
         state.flapTime = Mth.lerp(partialTicks, dragon.oFlapTime, dragon.flapTime);
         state.deathTime = 0.0F;
         state.hasRedOverlay = dragon.hurtTime > 0 || dragon.deathTime > 0;
@@ -108,6 +110,9 @@ public class DragonRenderer extends EntityRenderer<DragonEntity, DragonRenderSta
         DrakeModel model = state.male ? this.maleModel : this.femaleModel;
         int overlay = OverlayTexture.pack(0.0F, state.hasRedOverlay);
         collector.submitModel(model, state, poseStack, DragonTextures.skin(state.variant), state.lightCoords, overlay, state.outlineColor, null);
+        if (state.armorTexture != null) {
+            collector.submitModel(model, state, poseStack, RenderTypes.armorCutoutNoCull(state.armorTexture), state.lightCoords, overlay, state.outlineColor, null);
+        }
         collector.submitModel(model, state, poseStack, RenderTypes.eyes(DragonTextures.eyes(state.variant)), state.lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor, null);
         if (state.saddle != SaddleType.NONE) {
             collector.submitModel(this.saddleModel, state, poseStack, SADDLE_TEXTURE, state.lightCoords, overlay, state.outlineColor, null);

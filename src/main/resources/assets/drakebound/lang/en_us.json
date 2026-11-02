@@ -64,5 +64,11 @@
   "block.drakebound.dragon_skull": "Dragon Skull",
   "message.drakebound.command.follow": "%s is following you",
   "message.drakebound.command.sit": "%s is sitting",
-  "message.drakebound.command.wander": "%s is wandering around here"
+  "message.drakebound.command.wander": "%s is wandering around here",
+  "item.drakebound.leather_dragon_armor": "Leather Dragon Armor",
+  "item.drakebound.copper_dragon_armor": "Copper Dragon Armor",
+  "item.drakebound.iron_dragon_armor": "Iron Dragon Armor",
+  "item.drakebound.gold_dragon_armor": "Golden Dragon Armor",
+  "item.drakebound.diamond_dragon_armor": "Diamond Dragon Armor",
+  "item.drakebound.netherite_dragon_armor": "Netherite Dragon Armor"
 }

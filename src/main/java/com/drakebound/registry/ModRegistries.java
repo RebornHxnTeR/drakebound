@@ -6,6 +6,7 @@ import com.drakebound.block.DragonSkullBlock;
 import com.drakebound.entity.DragonEntity;
 import com.drakebound.entity.DragonVariant;
 import com.drakebound.entity.SaddleType;
+import com.drakebound.item.DragonArmorItem;
 import com.drakebound.item.DragonSaddleItem;
 import com.drakebound.world.DragonNestPiece;
 import com.drakebound.world.DragonNestStructure;
@@ -28,7 +29,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorMaterials;
 import net.minecraft.world.item.equipment.ArmorType;
+import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.level.block.Block;
@@ -126,6 +129,29 @@ public final class ModRegistries {
         }
     }
 
+    /** Armaduras que o próprio dragão veste (como as de cavalo), por material vanilla. */
+    public static final Map<String, DeferredItem<DragonArmorItem>> DRAGON_BODY_ARMOR = new java.util.LinkedHashMap<>();
+    static {
+        Map<String, ArmorMaterial> materials = new java.util.LinkedHashMap<>();
+        materials.put("leather", ArmorMaterials.LEATHER);
+        materials.put("copper", ArmorMaterials.COPPER);
+        materials.put("iron", ArmorMaterials.IRON);
+        materials.put("gold", ArmorMaterials.GOLD);
+        materials.put("diamond", ArmorMaterials.DIAMOND);
+        materials.put("netherite", ArmorMaterials.NETHERITE);
+        materials.forEach((name, material) -> DRAGON_BODY_ARMOR.put(name, ITEMS.registerItem(name + "_dragon_armor",
+            p -> new DragonArmorItem(name, p), p -> {
+                Item.Properties props = p.attributes(material.createAttributes(ArmorType.BODY))
+                    .component(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.BODY)
+                        .setEquipSound(SoundEvents.HORSE_ARMOR)
+                        .setAllowedEntities(DRAGON.get())
+                        .setDamageOnHurt(false)
+                        .build())
+                    .stacksTo(1);
+                return name.equals("netherite") ? props.fireResistant() : props;
+            })));
+    }
+
     public static final DeferredItem<DragonSaddleItem> SADDLE = ITEMS.registerItem("dragon_saddle",
         p -> new DragonSaddleItem(SaddleType.SINGLE, p), p -> p.stacksTo(1));
     public static final DeferredItem<DragonSaddleItem> DOUBLE_SADDLE = ITEMS.registerItem("double_dragon_saddle",
@@ -151,6 +177,7 @@ public final class ModRegistries {
                 output.accept(SADDLE);
                 output.accept(DOUBLE_SADDLE);
                 ARMOR.values().forEach(pieces -> pieces.values().forEach(output::accept));
+                DRAGON_BODY_ARMOR.values().forEach(output::accept);
                 SPAWN_EGGS.values().forEach(output::accept);
             })
             .build());

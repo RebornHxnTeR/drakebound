@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "X": "minecraft:gold_block",
+    "L": "minecraft:leather"
+  },
+  "pattern": [
+    "  X",
+    "XLX",
+    "X X"
+  ],
+  "result": {
+    "id": "drakebound:gold_dragon_armor"
+  }
+}
