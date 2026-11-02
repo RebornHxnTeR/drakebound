@@ -334,7 +334,7 @@
     "gui": {
       "rotation": [
         30,
-        45,
+        225,
         0
       ],
       "scale": [
@@ -365,7 +365,7 @@
     "thirdperson_righthand": {
       "rotation": [
         75,
-        45,
+        225,
         0
       ],
       "translation": [
@@ -382,7 +382,7 @@
     "firstperson_righthand": {
       "rotation": [
         0,
-        45,
+        225,
         0
       ],
       "scale": [
