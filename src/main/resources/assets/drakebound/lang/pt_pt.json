@@ -61,5 +61,8 @@
   "block.drakebound.carrion_block": "Bloco de Carniça",
   "block.drakebound.dragon_bone_block": "Bloco de Ossos de Dragão",
   "item.drakebound.dragon_bone": "Osso de Dragão",
-  "block.drakebound.dragon_skull": "Crânio de Dragão"
+  "block.drakebound.dragon_skull": "Crânio de Dragão",
+  "message.drakebound.command.follow": "%s está a seguir-te",
+  "message.drakebound.command.sit": "%s está sentado",
+  "message.drakebound.command.wander": "%s está a passear por aqui"
 }

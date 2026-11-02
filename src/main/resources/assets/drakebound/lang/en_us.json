@@ -61,5 +61,8 @@
   "block.drakebound.carrion_block": "Carrion Block",
   "block.drakebound.dragon_bone_block": "Dragon Bone Block",
   "item.drakebound.dragon_bone": "Dragon Bone",
-  "block.drakebound.dragon_skull": "Dragon Skull"
+  "block.drakebound.dragon_skull": "Dragon Skull",
+  "message.drakebound.command.follow": "%s is following you",
+  "message.drakebound.command.sit": "%s is sitting",
+  "message.drakebound.command.wander": "%s is wandering around here"
 }

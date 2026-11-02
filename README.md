@@ -41,7 +41,9 @@ Precisa de um JDK 25.
 
 ## Controlos (dono)
 
-- Clique com sela na mão: equipa a sela. Clique com a mão vazia: monta. Shift + clique com a mão vazia: tira a sela.
+- Clique com sela na mão: equipa a sela. Clique com a mão vazia: monta. Clique com tesoura: tira a sela.
+- Ordens (mão vazia; Shift + mão vazia se tiver sela): seguir → sentar → passear (anda à solta num raio de 32 blocos de onde foi deixado, sem se teleportar). A seguir, só se teleporta para o dono a mais de 48 blocos.
+- No chão o dragão caminha com as asas fechadas; a sombra acompanha o tamanho.
 - Sem sela, clique com a mão vazia: senta/levanta.
 - Montado no chão, o dragão anda; carrega no espaço para levantar voo. Tecla R: sopro.
 

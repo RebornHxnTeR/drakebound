@@ -30,7 +30,6 @@ import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.FollowOwnerGoal;
@@ -40,7 +39,6 @@ import net.minecraft.world.entity.ai.goal.MoveTowardsRestrictionGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.SitWhenOrderedToGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomFlyingGoal;
-import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
@@ -53,6 +51,7 @@ import net.minecraft.world.entity.boss.enderdragon.DragonFlightHistory;
 import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -72,6 +71,7 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
     private static final String TAG_MALE = "male";
     private static final String TAG_SADDLE = "saddle";
     private static final String TAG_STAMINA = "stamina";
+    private static final String TAG_WANDER = "wander";
 
     public static final int BABY_START_AGE = -72000;
     /** Um quarto do crescimento total (em segundos), por cada bloco de carniça. */
@@ -94,6 +94,13 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
 
     private static final byte FLAG_MALE = 1;
     private static final byte FLAG_EXHAUSTED = 2;
+    private static final byte FLAG_WANDER = 4;
+    /** Raio (blocos) em que um dragão em modo "passear" anda à solta. */
+    public static final int WANDER_RADIUS = 32;
+    /** Só se teleporta para o dono a partir desta distância (o dragão voa e é rápido). */
+    private static final double TELEPORT_DISTANCE_SQR = 48.0 * 48.0;
+    /** Velocidade com que o modelo passa de "a voar" para "pousado" (por tick). */
+    private static final float GROUND_BLEND_STEP = 0.1F;
 
     private static final EntityDataAccessor<Byte> DATA_VARIANT = SynchedEntityData.defineId(DragonEntity.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Byte> DATA_DRAGON_FLAGS = SynchedEntityData.defineId(DragonEntity.class, EntityDataSerializers.BYTE);
@@ -104,6 +111,9 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
     public final DragonFlightHistory flightHistory = new DragonFlightHistory();
     public float flapTime;
     public float oFlapTime;
+    /** 0 = a voar, 1 = pousado; suavizado para o modelo não saltar entre poses (só cliente). */
+    public float groundAmount;
+    public float oGroundAmount;
 
     private int stamina = MAX_STAMINA;
     private int breathTicks;
@@ -113,7 +123,7 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
     public DragonEntity(EntityType<? extends DragonEntity> type, Level level) {
         super(type, level);
         // Sem pairar parado: quando não tem destino a gravidade puxa-o para o chão, onde também anda.
-        this.moveControl = new FlyingMoveControl(this, 20, false);
+        this.moveControl = new DragonMoveControl(this);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -161,6 +171,20 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
 
     public boolean isExhausted() {
         return (this.entityData.get(DATA_DRAGON_FLAGS) & FLAG_EXHAUSTED) != 0;
+    }
+
+    /** Modo "passear": anda à solta perto de onde foi deixado em vez de seguir o dono. */
+    public boolean isWandering() {
+        return (this.entityData.get(DATA_DRAGON_FLAGS) & FLAG_WANDER) != 0;
+    }
+
+    private void setWandering(boolean wander) {
+        this.setDragonFlag(FLAG_WANDER, wander);
+        if (wander) {
+            this.setHomeTo(this.blockPosition(), WANDER_RADIUS);
+        } else {
+            this.clearHome();
+        }
     }
 
     private void setDragonFlag(byte flag, boolean value) {
@@ -251,6 +275,7 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
         output.putBoolean(TAG_MALE, this.isMale());
         output.putByte(TAG_SADDLE, (byte) this.getSaddle().ordinal());
         output.putInt(TAG_STAMINA, this.stamina);
+        output.putBoolean(TAG_WANDER, this.isWandering());
     }
 
     @Override
@@ -260,6 +285,7 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
         this.setDragonFlag(FLAG_MALE, input.getBooleanOr(TAG_MALE, this.isMale()));
         this.setSaddle(SaddleType.byId(input.getByteOr(TAG_SADDLE, (byte) this.getSaddle().ordinal())));
         this.stamina = input.getIntOr(TAG_STAMINA, MAX_STAMINA);
+        this.setDragonFlag(FLAG_WANDER, input.getBooleanOr(TAG_WANDER, false));
         this.entityData.set(DATA_STAGE, (byte) GrowthStage.fromAge(this.getAge()).ordinal());
         this.applyStats();
     }
@@ -279,12 +305,22 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2, true));
-        this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0, 12.0F, 4.0F));
+        this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0, 12.0F, 4.0F) {
+            @Override
+            public boolean canUse() {
+                return !DragonEntity.this.isWandering() && super.canUse();
+            }
+
+            @Override
+            public boolean canContinueToUse() {
+                return !DragonEntity.this.isWandering() && super.canContinueToUse();
+            }
+        });
         this.goalSelector.addGoal(4, new BreedGoal(this, 1.0));
         this.goalSelector.addGoal(4, new EatCarrionGoal(this));
         this.goalSelector.addGoal(5, new MoveTowardsRestrictionGoal(this, 1.0));
         // Passeia mais vezes a pé e de vez em quando levanta voo.
-        this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.6));
+        this.goalSelector.addGoal(6, new DragonWalkGoal(this, 0.7));
         WaterAvoidingRandomFlyingGoal fly = new WaterAvoidingRandomFlyingGoal(this, 1.0);
         fly.setInterval(400);
         this.goalSelector.addGoal(6, fly);
@@ -324,6 +360,12 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
     @Override
     protected boolean canFlyToOwner() {
         return true;
+    }
+
+    @Override
+    public boolean shouldTryTeleportToOwner() {
+        LivingEntity owner = this.getOwner();
+        return owner != null && !this.isWandering() && this.distanceToSqr(owner) >= TELEPORT_DISTANCE_SQR;
     }
 
     @Override
@@ -653,14 +695,17 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
             return super.mobInteract(player, hand);
         }
 
-        if (stack.isEmpty()) {
-            if (player.isSecondaryUseActive() && this.getSaddle() != SaddleType.NONE && !this.isVehicle()) {
-                if (server) {
-                    this.spawnAtLocation((ServerLevel) this.level(), new ItemStack(ModRegistries.saddleItem(this.getSaddle())));
-                    this.setSaddle(SaddleType.NONE);
-                }
-                return InteractionResult.SUCCESS;
+        // Tesoura tira a sela (como nos cavalos).
+        if (stack.is(Items.SHEARS) && this.getSaddle() != SaddleType.NONE && !this.isVehicle()) {
+            if (server) {
+                this.spawnAtLocation((ServerLevel) this.level(), new ItemStack(ModRegistries.saddleItem(this.getSaddle())));
+                this.setSaddle(SaddleType.NONE);
+                this.playSound(SoundEvents.SADDLE_UNEQUIP.value(), 1.0F, 0.8F);
             }
+            return InteractionResult.SUCCESS;
+        }
+
+        if (stack.isEmpty()) {
             if (!player.isSecondaryUseActive() && this.getSaddle() != SaddleType.NONE && this.getStage() == GrowthStage.ADULT) {
                 if (server) {
                     this.setOrderedToSit(false);
@@ -669,11 +714,9 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
                 }
                 return InteractionResult.SUCCESS;
             }
+            // Mão vazia (ou Shift + mão vazia se tiver sela): seguir -> sentar -> passear -> seguir.
             if (server) {
-                this.setOrderedToSit(!this.isOrderedToSit());
-                this.setInSittingPose(this.isOrderedToSit());
-                this.navigation.stop();
-                this.setTarget(null);
+                this.cycleCommand(player);
             }
             return InteractionResult.SUCCESS;
         }
@@ -733,6 +776,26 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
         }
     }
 
+    private void cycleCommand(Player player) {
+        String key;
+        if (this.isOrderedToSit()) {
+            this.setOrderedToSit(false);
+            this.setWandering(true);
+            key = "message.drakebound.command.wander";
+        } else if (this.isWandering()) {
+            this.setWandering(false);
+            key = "message.drakebound.command.follow";
+        } else {
+            this.setOrderedToSit(true);
+            key = "message.drakebound.command.sit";
+        }
+        this.setInSittingPose(this.isOrderedToSit());
+        this.navigation.stop();
+        this.setTarget(null);
+        this.jumping = false;
+        player.sendOverlayMessage(Component.translatable(key, this.getDisplayName()));
+    }
+
     // ---------------------------------------------------------------- cliente
 
     @Override
@@ -740,7 +803,10 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
         super.aiStep();
         if (this.level().isClientSide()) {
             this.oFlapTime = this.flapTime;
-            this.flapTime += this.onGround() ? 0.02F : this.isVehicle() ? 0.08F : 0.06F;
+            boolean grounded = this.onGround() || this.isInSittingPose();
+            this.flapTime += grounded ? 0.02F : this.isVehicle() ? 0.08F : 0.06F;
+            this.oGroundAmount = this.groundAmount;
+            this.groundAmount = Mth.approach(this.groundAmount, grounded ? 1.0F : 0.0F, GROUND_BLEND_STEP);
             // Guarda a rotação "ao contrário", como o Ender Dragon, para reaproveitar o seu modelo.
             this.flightHistory.record(this.getY(), this.yBodyRot + 180.0F);
         }

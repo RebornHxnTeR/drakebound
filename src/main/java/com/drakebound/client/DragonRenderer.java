@@ -37,12 +37,15 @@ public class DragonRenderer extends EntityRenderer<DragonEntity, DragonRenderSta
 
     private final DrakeModel maleModel;
     private final DrakeModel femaleModel;
+    /** Só as selas: a textura da sela não pode ser aplicada às asas, que partilham a mesma zona UV. */
+    private final DrakeModel saddleModel;
 
     public DragonRenderer(EntityRendererProvider.Context context) {
         super(context);
         this.shadowRadius = 3.0F;
         this.maleModel = new DrakeModel(context.bakeLayer(MALE_LAYER));
         this.femaleModel = new DrakeModel(context.bakeLayer(FEMALE_LAYER));
+        this.saddleModel = DrakeModel.saddleOnly(context.bakeLayer(FEMALE_LAYER));
         DragonTextures.rebuild(context.getResourceManager());
     }
 
@@ -69,17 +72,21 @@ public class DragonRenderer extends EntityRenderer<DragonEntity, DragonRenderSta
 
     @Override
     public void extractRenderState(DragonEntity dragon, DragonRenderState state, float partialTicks) {
+        // Antes do super: a sombra (calculada no super) depende da escala.
+        state.growthScale = dragon.getAgeScale();
         super.extractRenderState(dragon, state, partialTicks);
         state.variant = dragon.getVariant();
         state.male = dragon.isMale();
-        state.growthScale = dragon.getAgeScale();
         state.saddle = dragon.getSaddle();
         state.flapTime = Mth.lerp(partialTicks, dragon.oFlapTime, dragon.flapTime);
         state.deathTime = 0.0F;
         state.hasRedOverlay = dragon.hurtTime > 0 || dragon.deathTime > 0;
         state.beamOffset = null;
         state.isLandingOrTakingOff = false;
-        state.isSitting = dragon.onGround();
+        state.groundAmount = Mth.lerp(partialTicks, dragon.oGroundAmount, dragon.groundAmount);
+        state.isSitting = false;
+        state.walkPos = dragon.walkAnimation.position(partialTicks);
+        state.walkSpeed = dragon.walkAnimation.speed(partialTicks);
         state.partialTicks = partialTicks;
         state.flightHistory.copyFrom(dragon.flightHistory);
     }
@@ -103,10 +110,16 @@ public class DragonRenderer extends EntityRenderer<DragonEntity, DragonRenderSta
         collector.submitModel(model, state, poseStack, DragonTextures.skin(state.variant), state.lightCoords, overlay, state.outlineColor, null);
         collector.submitModel(model, state, poseStack, RenderTypes.eyes(DragonTextures.eyes(state.variant)), state.lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor, null);
         if (state.saddle != SaddleType.NONE) {
-            collector.submitModel(model, state, poseStack, SADDLE_TEXTURE, state.lightCoords, overlay, state.outlineColor, null);
+            collector.submitModel(this.saddleModel, state, poseStack, SADDLE_TEXTURE, state.lightCoords, overlay, state.outlineColor, null);
         }
         poseStack.popPose();
         super.submit(state, poseStack, collector, camera);
+    }
+
+    /** A sombra acompanha o tamanho do dragão. */
+    @Override
+    protected float getShadowRadius(DragonRenderState state) {
+        return this.shadowRadius * state.growthScale;
     }
 
     /** O modelo (asas e cauda) é muito maior do que a caixa de colisão. */
