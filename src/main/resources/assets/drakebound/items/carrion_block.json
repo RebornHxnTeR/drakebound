@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "drakebound:block/carrion_block"
+  }
+}

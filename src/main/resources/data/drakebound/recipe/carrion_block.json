@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "FFF",
+    "FFF",
+    "FFF"
+  ],
+  "key": {
+    "F": "minecraft:rotten_flesh"
+  },
+  "result": {
+    "id": "drakebound:carrion_block",
+    "count": 1
+  }
+}

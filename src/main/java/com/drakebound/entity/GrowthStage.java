@@ -1,10 +1,20 @@
 package com.drakebound.entity;
 
-/** Fases de crescimento. A idade (ticks) vem do AgeableMob: começa em -72000 e sobe até 0. */
+/**
+ * Fases de crescimento. A idade (ticks) vem do AgeableMob: começa em -72000 (60 min) e sobe até 0.
+ * Cada fase tem o seu tamanho; o recém-nascido é um pouco mais pequeno do que o bebé.
+ */
 public enum GrowthStage {
-    HATCHLING(0.3F, 0.15F),
-    JUVENILE(0.6F, 0.5F),
+    NEWBORN(0.2F, 0.1F),
+    BABY(0.3F, 0.2F),
+    CHILD(0.45F, 0.35F),
+    TEEN(0.7F, 0.6F),
     ADULT(1.0F, 1.0F);
+
+    /** Ticks que ainda faltam para adulto no início de cada fase (90%, 70% e 45% do total). */
+    private static final int BABY_FROM = -DragonEntity.BABY_START_AGE * 9 / 10;
+    private static final int CHILD_FROM = -DragonEntity.BABY_START_AGE * 7 / 10;
+    private static final int TEEN_FROM = -DragonEntity.BABY_START_AGE * 45 / 100;
 
     private static final GrowthStage[] VALUES = values();
     public final float scale;
@@ -20,6 +30,7 @@ public enum GrowthStage {
     }
 
     public static GrowthStage fromAge(int age) {
-        return age >= 0 ? ADULT : age >= DragonEntity.BABY_START_AGE / 3 * 2 ? JUVENILE : HATCHLING;
+        int left = -age;
+        return left <= 0 ? ADULT : left <= TEEN_FROM ? TEEN : left <= CHILD_FROM ? CHILD : left <= BABY_FROM ? BABY : NEWBORN;
     }
 }

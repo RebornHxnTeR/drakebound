@@ -74,6 +74,8 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
     private static final String TAG_STAMINA = "stamina";
 
     public static final int BABY_START_AGE = -72000;
+    /** Um quarto do crescimento total (em segundos), por cada bloco de carniça. */
+    private static final int CARRION_GROWTH_SECONDS = -BABY_START_AGE / 20 / 4;
     public static final float REJECT_CHANCE = 0.05F;
     public static final int NEST_RADIUS = 24;
 
@@ -278,6 +280,7 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2, true));
         this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0, 12.0F, 4.0F));
         this.goalSelector.addGoal(4, new BreedGoal(this, 1.0));
+        this.goalSelector.addGoal(4, new EatCarrionGoal(this));
         this.goalSelector.addGoal(5, new MoveTowardsRestrictionGoal(this, 1.0));
         // Passeia mais vezes a pé e de vez em quando levanta voo.
         this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.6));
@@ -609,6 +612,17 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
             return InteractionResult.PASS;
         }
 
+        // Bloco de carniça: alimento forte, faz a cria avançar um quarto do crescimento de uma vez.
+        if (stack.is(ModRegistries.CARRION_BLOCK_ITEM.get()) && (this.isBaby() || this.getHealth() < this.getMaxHealth())) {
+            if (server) {
+                this.feed(player, hand, stack, 1.0F, 40.0F);
+                if (this.isBaby()) {
+                    this.ageUp(CARRION_GROWTH_SECONDS, true);
+                }
+            }
+            return InteractionResult.SUCCESS;
+        }
+
         if (stack.is(ModTags.DRAGON_FOOD) && (this.isBaby() || this.getHealth() < this.getMaxHealth())) {
             if (server) {
                 this.feed(player, hand, stack, 1.0F, 8.0F);
@@ -673,6 +687,12 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
     @Override
     public boolean canFallInLove() {
         return this.isTame() && this.getStage() == GrowthStage.ADULT && this.isInLava() && super.canFallInLove();
+    }
+
+    /** Adulto domesticado, livre e ainda sem vontade de acasalar: come carniça junto à lava se a encontrar. */
+    public boolean wantsCarrion() {
+        return this.isTame() && this.getStage() == GrowthStage.ADULT && this.getAge() == 0 && !this.isInLove() && !this.isOrderedToSit()
+            && !this.isVehicle();
     }
 
     /** Reprodução exige dois dragões domesticados, adultos, da mesma variante, de sexos opostos e ambos dentro de lava. */

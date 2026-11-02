@@ -31,9 +31,9 @@ Precisa de um JDK 25.
 - **Ovo do Ender Dragon do jogo**: colocado em cima de magma e aceso com isqueiro, choca uma cria do Dragão do Ender domesticável.
 - **Ovos**: só chocam em cima de um bloco de magma e depois de acesos com um isqueiro, em cerca de 10 minutos. Tirar o magma apaga o ovo (o progresso fica guardado). Ao nascer, o dono é o jogador mais próximo num raio de 16 blocos.
 - **Domesticação**: só crias. Sem dono, domestica-se com carne crua, com 5% de rejeição por tentativa. Adultos selvagens não se domesticam.
-- **Crescimento**: cria, juvenil e adulto (3 dias de jogo, mais rápido a dar carne crua).
+- **Crescimento**: recém-nascido, bebé, criança, adolescente e adulto, cada fase com o seu tamanho (3 dias de jogo). A carne crua acelera um pouco; o Bloco de Carniça (9 carnes podres) avança um quarto do crescimento de uma vez.
 - **Armaduras de dragão**: uma por cor, feitas e reparadas com as escamas dessa cor (mesma forma das armaduras do jogo). Protegem como netherite, não ardem na lava e aceitam moldes de embelezamento na mesa de ferraria.
-- **Reprodução**: dois dragões domesticados, adultos, da mesma cor e de sexos opostos, ambos dentro de lava, e dar um bloco de ouro a cada um. A fêmea põe um ovo.
+- **Reprodução**: dois dragões domesticados, adultos, da mesma cor e de sexos opostos, ambos dentro de lava, e dar um bloco de ouro a cada um. Em alternativa, pousa um Bloco de Carniça encostado à lava: os adultos domesticados vão comê-lo quando quiserem e ficam prontos para acasalar. A fêmea põe um ovo.
 - **Caça**: os selvagens caçam galinhas, cabras, vacas e ovelhas e recuperam vida ao comer.
 - **Escamas**: cada cor larga a sua escama.
 - **Selas** de ferro (simples para 1 jogador, dupla para 2). Voo com energia: ao esgotar, o dragão plana até ao chão e tem de descansar. Tecla **R** para soprar enquanto montas.

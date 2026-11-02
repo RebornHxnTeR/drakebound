@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "drakebound:block/carrion_block_top",
+    "side": "drakebound:block/carrion_block_side",
+    "bottom": "drakebound:block/carrion_block_top",
+    "particle": "drakebound:block/carrion_block_top"
+  }
+}

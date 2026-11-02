@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "drakebound:carrion_block"
+  ],
+  "result": {
+    "id": "minecraft:rotten_flesh",
+    "count": 9
+  }
+}

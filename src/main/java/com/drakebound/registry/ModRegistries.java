@@ -62,6 +62,11 @@ public final class ModRegistries {
         p -> p.mapColor(MapColor.TERRACOTTA_BLACK).strength(0.6F).sound(SoundType.ROOTED_DIRT).lightLevel(s -> 3));
     public static final DeferredItem<BlockItem> SCORCHED_EARTH_ITEM = ITEMS.registerSimpleBlockItem(SCORCHED_EARTH);
 
+    /** Bloco de carniça: 9 carnes podres; acelera muito o crescimento das crias. */
+    public static final DeferredBlock<Block> CARRION_BLOCK = BLOCKS.registerSimpleBlock("carrion_block",
+        p -> p.mapColor(MapColor.COLOR_RED).strength(0.8F).sound(SoundType.SLIME_BLOCK));
+    public static final DeferredItem<BlockItem> CARRION_BLOCK_ITEM = ITEMS.registerSimpleBlockItem(CARRION_BLOCK);
+
     public static final Map<DragonVariant, DeferredBlock<DragonEggBlock>> EGG_BLOCKS = new EnumMap<>(DragonVariant.class);
     public static final Map<DragonVariant, DeferredItem<BlockItem>> EGG_ITEMS = new EnumMap<>(DragonVariant.class);
     public static final Map<DragonVariant, DeferredItem<SpawnEggItem>> SPAWN_EGGS = new EnumMap<>(DragonVariant.class);
@@ -124,6 +129,7 @@ public final class ModRegistries {
             .displayItems((params, output) -> {
                 EGG_ITEMS.values().forEach(output::accept);
                 output.accept(SCORCHED_EARTH_ITEM);
+                output.accept(CARRION_BLOCK_ITEM);
                 SCALES.values().forEach(output::accept);
                 output.accept(SADDLE);
                 output.accept(DOUBLE_SADDLE);
