@@ -7,7 +7,6 @@ import com.drakebound.registry.ModRegistries;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.monster.dragon.EnderDragonModel;
 import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -37,7 +36,7 @@ public final class DrakeboundClient {
 
     private static void onRegisterLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(DragonRenderer.MALE_LAYER, DragonRenderer::createMaleLayer);
-        event.registerLayerDefinition(DragonRenderer.FEMALE_LAYER, EnderDragonModel::createBodyLayer);
+        event.registerLayerDefinition(DragonRenderer.FEMALE_LAYER, DragonRenderer::createFemaleLayer);
     }
 
     private static void onRegisterKeys(RegisterKeyMappingsEvent event) {

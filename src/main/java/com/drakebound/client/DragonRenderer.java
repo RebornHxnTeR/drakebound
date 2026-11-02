@@ -2,6 +2,7 @@ package com.drakebound.client;
 
 import com.drakebound.Drakebound;
 import com.drakebound.entity.DragonEntity;
+import com.drakebound.entity.SaddleType;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -32,14 +33,16 @@ public class DragonRenderer extends EntityRenderer<DragonEntity, DragonRenderSta
     /** Desce o modelo para que as patas toquem no chão (em blocos, antes da escala). */
     private static final float MODEL_Y_OFFSET = -1.0F;
 
-    private final EnderDragonModel maleModel;
-    private final EnderDragonModel femaleModel;
+    private static final Identifier SADDLE_TEXTURE = Identifier.fromNamespaceAndPath(Drakebound.MOD_ID, "textures/entity/dragon_saddle.png");
+
+    private final DrakeModel maleModel;
+    private final DrakeModel femaleModel;
 
     public DragonRenderer(EntityRendererProvider.Context context) {
         super(context);
         this.shadowRadius = 3.0F;
-        this.maleModel = new EnderDragonModel(context.bakeLayer(MALE_LAYER));
-        this.femaleModel = new EnderDragonModel(context.bakeLayer(FEMALE_LAYER));
+        this.maleModel = new DrakeModel(context.bakeLayer(MALE_LAYER));
+        this.femaleModel = new DrakeModel(context.bakeLayer(FEMALE_LAYER));
         DragonTextures.rebuild(context.getResourceManager());
     }
 
@@ -51,8 +54,12 @@ public class DragonRenderer extends EntityRenderer<DragonEntity, DragonRenderSta
                     .mirror()
                     .addBox("horn", 4.0F, -3.0F, 0.0F, 3, 3, 18, 0, 0),
                 PartPose.offsetAndRotation(0.0F, -8.0F, 0.0F, 0.45F, 0.0F, 0.0F));
-            return mesh;
+            return DrakeModel.addSaddles(mesh);
         });
+    }
+
+    public static LayerDefinition createFemaleLayer() {
+        return EnderDragonModel.createBodyLayer().apply(DrakeModel::addSaddles);
     }
 
     @Override
@@ -66,6 +73,7 @@ public class DragonRenderer extends EntityRenderer<DragonEntity, DragonRenderSta
         state.variant = dragon.getVariant();
         state.male = dragon.isMale();
         state.growthScale = dragon.getAgeScale();
+        state.saddle = dragon.getSaddle();
         state.flapTime = Mth.lerp(partialTicks, dragon.oFlapTime, dragon.flapTime);
         state.deathTime = 0.0F;
         state.hasRedOverlay = dragon.hurtTime > 0 || dragon.deathTime > 0;
@@ -90,10 +98,13 @@ public class DragonRenderer extends EntityRenderer<DragonEntity, DragonRenderSta
         poseStack.scale(-1.0F, -1.0F, 1.0F);
         poseStack.translate(0.0F, -1.501F, 0.0F);
 
-        EnderDragonModel model = state.male ? this.maleModel : this.femaleModel;
+        DrakeModel model = state.male ? this.maleModel : this.femaleModel;
         int overlay = OverlayTexture.pack(0.0F, state.hasRedOverlay);
         collector.submitModel(model, state, poseStack, DragonTextures.skin(state.variant), state.lightCoords, overlay, state.outlineColor, null);
         collector.submitModel(model, state, poseStack, RenderTypes.eyes(DragonTextures.eyes(state.variant)), state.lightCoords, OverlayTexture.NO_OVERLAY, state.outlineColor, null);
+        if (state.saddle != SaddleType.NONE) {
+            collector.submitModel(model, state, poseStack, SADDLE_TEXTURE, state.lightCoords, overlay, state.outlineColor, null);
+        }
         poseStack.popPose();
         super.submit(state, poseStack, collector, camera);
     }
