@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "drakebound:yellow_dragon"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "drakebound:yellow_dragon"
+      }
+    ]
+  }
+}

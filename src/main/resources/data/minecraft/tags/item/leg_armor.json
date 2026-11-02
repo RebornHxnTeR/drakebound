@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "drakebound:green_dragon_leggings",
+    "drakebound:yellow_dragon_leggings",
+    "drakebound:red_dragon_leggings",
+    "drakebound:grey_dragon_leggings",
+    "drakebound:nether_elder_dragon_leggings",
+    "drakebound:ender_dragon_leggings"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "drakebound:green_dragon_chestplate",
+    "drakebound:yellow_dragon_chestplate",
+    "drakebound:red_dragon_chestplate",
+    "drakebound:grey_dragon_chestplate",
+    "drakebound:nether_elder_dragon_chestplate",
+    "drakebound:ender_dragon_chestplate"
+  ]
+}

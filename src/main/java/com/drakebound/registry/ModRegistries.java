@@ -13,7 +13,10 @@ import java.util.Map;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.component.TypedEntityData;
@@ -22,6 +25,9 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorType;
+import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -80,6 +86,27 @@ public final class ModRegistries {
         }
     }
 
+    /** Armaduras de escamas: uma por cor, protegem como netherite (acima do diamante) e aceitam moldes de embelezamento. */
+    public static final Map<DragonVariant, Map<ArmorType, DeferredItem<Item>>> ARMOR = new EnumMap<>(DragonVariant.class);
+    private static final ArmorType[] ARMOR_PIECES = {ArmorType.HELMET, ArmorType.CHESTPLATE, ArmorType.LEGGINGS, ArmorType.BOOTS};
+
+    static {
+        Map<ArmorType, Integer> defense = Map.of(ArmorType.BOOTS, 3, ArmorType.LEGGINGS, 6, ArmorType.CHESTPLATE, 8,
+            ArmorType.HELMET, 3, ArmorType.BODY, 11);
+        for (DragonVariant variant : DragonVariant.values()) {
+            String name = variant.getSerializedName() + "_dragon";
+            ArmorMaterial material = new ArmorMaterial(37, defense, 15, SoundEvents.ARMOR_EQUIP_NETHERITE, 3.0F, 0.1F,
+                TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Drakebound.MOD_ID, "repairs_" + name + "_armor")),
+                ResourceKey.create(EquipmentAssets.ROOT_ID, Identifier.fromNamespaceAndPath(Drakebound.MOD_ID, name)));
+            Map<ArmorType, DeferredItem<Item>> pieces = new EnumMap<>(ArmorType.class);
+            for (ArmorType type : ARMOR_PIECES) {
+                pieces.put(type, ITEMS.registerSimpleItem(name + "_" + type.getName(),
+                    p -> p.humanoidArmor(material, type).fireResistant().rarity(Rarity.EPIC)));
+            }
+            ARMOR.put(variant, pieces);
+        }
+    }
+
     public static final DeferredItem<DragonSaddleItem> SADDLE = ITEMS.registerItem("dragon_saddle",
         p -> new DragonSaddleItem(SaddleType.SINGLE, p), p -> p.stacksTo(1));
     public static final DeferredItem<DragonSaddleItem> DOUBLE_SADDLE = ITEMS.registerItem("double_dragon_saddle",
@@ -100,6 +127,7 @@ public final class ModRegistries {
                 SCALES.values().forEach(output::accept);
                 output.accept(SADDLE);
                 output.accept(DOUBLE_SADDLE);
+                ARMOR.values().forEach(pieces -> pieces.values().forEach(output::accept));
                 SPAWN_EGGS.values().forEach(output::accept);
             })
             .build());

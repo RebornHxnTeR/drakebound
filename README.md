@@ -32,6 +32,7 @@ Precisa de um JDK 25.
 - **Ovos**: só chocam em cima de um bloco de magma e depois de acesos com um isqueiro, em cerca de 10 minutos. Tirar o magma apaga o ovo (o progresso fica guardado). Ao nascer, o dono é o jogador mais próximo num raio de 16 blocos.
 - **Domesticação**: só crias. Sem dono, domestica-se com carne crua, com 5% de rejeição por tentativa. Adultos selvagens não se domesticam.
 - **Crescimento**: cria, juvenil e adulto (3 dias de jogo, mais rápido a dar carne crua).
+- **Armaduras de dragão**: uma por cor, feitas e reparadas com as escamas dessa cor (mesma forma das armaduras do jogo). Protegem como netherite, não ardem na lava e aceitam moldes de embelezamento na mesa de ferraria.
 - **Reprodução**: dois dragões domesticados, adultos, da mesma cor e de sexos opostos, ambos dentro de lava, e dar um bloco de ouro a cada um. A fêmea põe um ovo.
 - **Caça**: os selvagens caçam galinhas, cabras, vacas e ovelhas e recuperam vida ao comer.
 - **Escamas**: cada cor larga a sua escama.

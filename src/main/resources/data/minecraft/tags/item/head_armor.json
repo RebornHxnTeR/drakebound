@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "drakebound:green_dragon_helmet",
+    "drakebound:yellow_dragon_helmet",
+    "drakebound:red_dragon_helmet",
+    "drakebound:grey_dragon_helmet",
+    "drakebound:nether_elder_dragon_helmet",
+    "drakebound:ender_dragon_helmet"
+  ]
+}

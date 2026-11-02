@@ -12,8 +12,6 @@ public final class ModTags {
     public static final TagKey<Item> DRAGON_FOOD = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Drakebound.MOD_ID, "dragon_food"));
     /** Comida especial que põe dois dragões domesticados em modo de reprodução. */
     public static final TagKey<Item> DRAGON_BREEDING_FOOD = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Drakebound.MOD_ID, "dragon_breeding_food"));
-    /** Blocos que aquecem os ovos quando estão encostados a eles. */
-
     /** Blocos de terra que o sopro de fogo transforma em terra queimada. */
     public static final TagKey<Block> SCORCHABLE = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(Drakebound.MOD_ID, "scorchable"));
 

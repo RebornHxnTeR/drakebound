@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "S S",
+    "SSS",
+    "SSS"
+  ],
+  "key": {
+    "S": "drakebound:grey_dragon_scale"
+  },
+  "result": {
+    "id": "drakebound:grey_dragon_chestplate",
+    "count": 1
+  }
+}
