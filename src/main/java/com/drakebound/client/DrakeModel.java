@@ -43,8 +43,9 @@ public class DrakeModel extends EnderDragonModel {
     /** Pescoço erguido em curva e cabeça direita. */
     private static final float[] NECK_STAND = {-0.7F, -0.45F, -0.2F, 0.0F, 0.15F};
     private static final float HEAD_STAND = 0.05F;
-    private static final float TAIL_DROOP = -0.03F;
+    private static final float TAIL_DROOP = 0.02F;
     private static final float SEGMENT = 10.0F;
+    private static final float TURN_DAMPING = 0.5F;
 
     private final ModelPart saddleFront;
     private final ModelPart saddleBack;
@@ -63,6 +64,7 @@ public class DrakeModel extends EnderDragonModel {
     private final ModelPart[] neck = new ModelPart[5];
     private final ModelPart[] tail = new ModelPart[12];
     private final ModelPart head;
+    private final ModelPart body;
 
     public DrakeModel(ModelPart root) {
         super(root);
@@ -88,6 +90,7 @@ public class DrakeModel extends EnderDragonModel {
             this.tail[i] = root.getChild("tail" + i);
         }
         this.head = root.getChild("head");
+        this.body = body;
     }
 
     /** Modelo que só desenha as selas (o resto continua a ser posicionado, mas não é desenhado). */
@@ -146,7 +149,7 @@ public class DrakeModel extends EnderDragonModel {
             this.rightWing.zRot = -this.leftWing.zRot;
             this.rightWingTip.zRot = -this.leftWingTip.zRot;
 
-            this.standPose(ground);
+            this.standPose(ground, drake.flapTime * Mth.TWO_PI);
             // Patas: diagonais alternadas (frente-esquerda com trás-direita), como um quadrúpede.
             float swing = Mth.sin(drake.walkPos * STEP_FREQ) * STEP_SWING * Math.min(1.0F, drake.walkSpeed * 2.0F) * ground;
             this.leftFrontLeg.xRot += swing;
@@ -157,8 +160,15 @@ public class DrakeModel extends EnderDragonModel {
     }
 
     /** Mistura a pose de voo (do Ender Dragon) com a pose de pé: patas por baixo do corpo, pescoço erguido. */
-    private void standPose(float ground) {
+    private void standPose(float ground, float flap) {
         this.root.y -= STAND_LIFT * ground;
+        // No chão não se inclina para os lados ao virar (isso é do voo).
+        float level = 1.0F - ground;
+        // Ao virar no chão pescoço e cauda curvam metade do que curvam a voar.
+        float curl = 1.0F - TURN_DAMPING * ground;
+        this.body.zRot *= level;
+        this.head.zRot *= level;
+        this.head.yRot *= curl;
         this.leftFrontLeg.xRot = Mth.lerp(ground, this.leftFrontLeg.xRot, FRONT_UPPER);
         this.rightFrontLeg.xRot = this.leftFrontLeg.xRot;
         this.leftHindLeg.xRot = Mth.lerp(ground, this.leftHindLeg.xRot, HIND_UPPER);
@@ -176,6 +186,8 @@ public class DrakeModel extends EnderDragonModel {
         for (int i = 0; i < this.neck.length; i++) {
             ModelPart part = this.neck[i];
             part.xRot = Mth.lerp(ground, part.xRot, NECK_STAND[i]);
+            part.zRot *= level;
+            part.yRot *= curl;
             part.x = x;
             part.y = y;
             part.z = z;
@@ -191,10 +203,14 @@ public class DrakeModel extends EnderDragonModel {
         x = this.tail[0].x;
         y = this.tail[0].y;
         z = this.tail[0].z;
-        float droop = 0.0F;
-        for (ModelPart part : this.tail) {
-            droop += TAIL_DROOP * ground;
-            part.xRot += droop;
+        // No chão a cauda ignora as subidas/descidas do histórico de voo (que a faziam levantar).
+        float bend = 0.0F;
+        for (int i = 0; i < this.tail.length; i++) {
+            ModelPart part = this.tail[i];
+            bend += Mth.sin(i * 0.45F + flap) * 0.05F + TAIL_DROOP;
+            part.xRot = Mth.lerp(ground, part.xRot, bend);
+            part.zRot *= level;
+            part.yRot = Mth.PI + (part.yRot - Mth.PI) * curl;
             part.x = x;
             part.y = y;
             part.z = z;

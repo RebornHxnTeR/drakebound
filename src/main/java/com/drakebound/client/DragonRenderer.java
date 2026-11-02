@@ -99,8 +99,11 @@ public class DragonRenderer extends EntityRenderer<DragonEntity, DragonRenderSta
         float scale = MODEL_SCALE * state.growthScale;
         poseStack.scale(scale, scale, scale);
         poseStack.translate(0.0F, MODEL_Y_OFFSET, 0.0F);
-        float yRot = state.getHistoricalPos(7).yRot();
-        float pitch = (float) (state.getHistoricalPos(5).y() - state.getHistoricalPos(10).y());
+        // A voar o corpo segue o rasto do voo (atrasado, inclina); no chão segue a rotação atual, sem inclinar.
+        float ground = state.groundAmount;
+        float flyYaw = state.getHistoricalPos(7).yRot();
+        float yRot = flyYaw + Mth.wrapDegrees(state.getHistoricalPos(0).yRot() - flyYaw) * ground;
+        float pitch = (float) (state.getHistoricalPos(5).y() - state.getHistoricalPos(10).y()) * (1.0F - ground);
         poseStack.mulPose(Axis.YP.rotationDegrees(-yRot));
         poseStack.mulPose(Axis.XP.rotationDegrees(pitch * 10.0F));
         poseStack.translate(0.0F, 0.0F, 1.0F);

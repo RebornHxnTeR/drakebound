@@ -54,6 +54,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
@@ -102,6 +103,8 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
     private static final double TELEPORT_DISTANCE_SQR = 48.0 * 48.0;
     /** Velocidade com que o modelo passa de "a voar" para "pousado" (por tick). */
     private static final float GROUND_BLEND_STEP = 0.1F;
+    private static final int FLY_MIN_HEIGHT = 10;
+    private static final int FLY_EXTRA_HEIGHT = 9;
 
     private static final EntityDataAccessor<Byte> DATA_VARIANT = SynchedEntityData.defineId(DragonEntity.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Byte> DATA_DRAGON_FLAGS = SynchedEntityData.defineId(DragonEntity.class, EntityDataSerializers.BYTE);
@@ -324,7 +327,18 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
         this.goalSelector.addGoal(5, new MoveTowardsRestrictionGoal(this, 1.0));
         // Passeia mais vezes a pé e de vez em quando levanta voo.
         this.goalSelector.addGoal(6, new DragonWalkGoal(this, 0.7));
-        WaterAvoidingRandomFlyingGoal fly = new WaterAvoidingRandomFlyingGoal(this, 1.0);
+        // Voo alto (10 a 18 blocos acima do chão): o voo "rasteiro" do goal vanilla parecia o dragão a flutuar.
+        WaterAvoidingRandomFlyingGoal fly = new WaterAvoidingRandomFlyingGoal(this, 1.0) {
+            @Override
+            protected @Nullable Vec3 getPosition() {
+                Vec3 pos = super.getPosition();
+                if (pos == null) {
+                    return null;
+                }
+                int ground = DragonEntity.this.level().getHeight(Heightmap.Types.MOTION_BLOCKING, Mth.floor(pos.x), Mth.floor(pos.z));
+                return new Vec3(pos.x, Math.max(pos.y, ground + FLY_MIN_HEIGHT + DragonEntity.this.random.nextInt(FLY_EXTRA_HEIGHT)), pos.z);
+            }
+        };
         fly.setInterval(400);
         this.goalSelector.addGoal(6, fly);
         this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 16.0F));
