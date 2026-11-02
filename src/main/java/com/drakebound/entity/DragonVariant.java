@@ -15,12 +15,12 @@ import org.jspecify.annotations.Nullable;
  */
 public enum DragonVariant implements StringRepresentable {
     //        id              dark      light     eyes      mult  particle                      effect               amp  fireSec
-    GREEN("green",          0x1E3A12, 0x7BC74D, 0xE8F25A, 1.0F, ParticleTypes.SNEEZE,           MobEffects.POISON,    1,   0),
-    YELLOW("yellow",        0x5A4A0C, 0xF2D23C, 0x7FE8FF, 1.0F, ParticleTypes.ELECTRIC_SPARK,   MobEffects.SLOWNESS,  2,   0),
+    GREEN("green",          0x1E3A12, 0x7BC74D, 0xE8F25A, 1.0F, ParticleTypes.SNEEZE,           MobEffects.POISON,    1,   4),
+    YELLOW("yellow",        0x5A4A0C, 0xF2D23C, 0x7FE8FF, 1.0F, ParticleTypes.ELECTRIC_SPARK,   MobEffects.SLOWNESS,  2,   4),
     RED("red",              0x4A0E0E, 0xD8442E, 0xFFC23A, 1.0F,  ParticleTypes.FLAME,            null,                 0,   5),
-    GREY("grey",            0x2A2A2E, 0x9A9AA4, 0xB040FF, 1.0F, ParticleTypes.SQUID_INK,        MobEffects.DARKNESS,  0,   0),
+    GREY("grey",            0x2A2A2E, 0x9A9AA4, 0xB040FF, 1.0F, ParticleTypes.SQUID_INK,        MobEffects.DARKNESS,  0,   4),
     NETHER_ELDER("nether_elder", 0x2B0A05, 0xFF8A1E, 0xFFF4B0, 1.5F, ParticleTypes.SOUL_FIRE_FLAME, MobEffects.WITHER,  1,   6),
-    ENDER("ender",          0x1E0F2E, 0x9B3FD8, 0xE070FF, 1.2F, ParticleTypes.REVERSE_PORTAL,  MobEffects.LEVITATION, 0,  0);
+    ENDER("ender",          0x1E0F2E, 0x9B3FD8, 0xE070FF, 1.2F, ParticleTypes.REVERSE_PORTAL,  MobEffects.LEVITATION, 0,  4);
 
     public static final Codec<DragonVariant> CODEC = StringRepresentable.fromEnum(DragonVariant::values);
     private static final DragonVariant[] VALUES = values();

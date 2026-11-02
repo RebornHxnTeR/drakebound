@@ -15,11 +15,11 @@ Precisa de um JDK 25.
 
 ## O que já existe
 
-| Dragão | Onde aparece | Sopro |
+| Dragão | Onde aparece | Sopro (todos deitam fogo, mais este efeito) |
 |---|---|---|
 | Verdejante (Verdant) | Ninhos nas Cavernas Verdejantes | Veneno |
 | Dos Picos (Peaks) | Ninhos no topo das montanhas (picos) | Elétrico (lentidão) |
-| Áridas (Badlands) | Ninhos nas Badlands | Fogo (queima a terra) |
+| Áridas (Badlands) | Ninhos nas Badlands | Só fogo, que queima mais tempo |
 | Saqueador (Raider) | 15% por vaga de raid e 10% nos postos avançados, montado por um Pillager | Escuridão |
 | Do Ender (Ender Dragon) | Ninho único na ilha principal do End, fora dos pilares | Levitação (vida e dano x1,2) |
 | Ancião do Nether (Nether Ancient) | Ninho antigo e raro no Nether (vida e dano x1,5) | Fogo de almas e definhamento |
@@ -42,6 +42,7 @@ Precisa de um JDK 25.
 
 - Clique com sela na mão: equipa a sela. Clique com a mão vazia: monta. Shift + clique com a mão vazia: tira a sela.
 - Sem sela, clique com a mão vazia: senta/levanta.
+- Montado no chão, o dragão anda; carrega no espaço para levantar voo. Tecla R: sopro.
 
 ## Encontrar ninhos
 

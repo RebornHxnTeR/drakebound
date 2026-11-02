@@ -4,6 +4,8 @@ import com.drakebound.item.DragonSaddleItem;
 import com.drakebound.registry.ModRegistries;
 import com.drakebound.registry.ModTags;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -38,6 +40,7 @@ import net.minecraft.world.entity.ai.goal.MoveTowardsRestrictionGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.SitWhenOrderedToGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomFlyingGoal;
+import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
@@ -81,6 +84,9 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
     private static final double BREATH_RANGE = 20.0;
     private static final double BREATH_CONE_DOT = 0.75;
     private static final float RIDDEN_FLY_ACCEL = 0.1F;
+    private static final float RIDDEN_WALK_ACCEL = 0.12F;
+    /** Atrito no chão (bloco normal 0.6 x ar 0.91), igual ao de qualquer mob a andar. */
+    private static final double GROUND_FRICTION = 0.546;
     private static final int PREY_SEARCH_INTERVAL = 300;
     private static final float PREY_HEAL = 20.0F;
 
@@ -104,7 +110,8 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
 
     public DragonEntity(EntityType<? extends DragonEntity> type, Level level) {
         super(type, level);
-        this.moveControl = new FlyingMoveControl(this, 20, true);
+        // Sem pairar parado: quando não tem destino a gravidade puxa-o para o chão, onde também anda.
+        this.moveControl = new FlyingMoveControl(this, 20, false);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -116,6 +123,7 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
             .add(Attributes.KNOCKBACK_RESISTANCE, 0.8)
             .add(Attributes.MOVEMENT_SPEED, 0.3)
             .add(Attributes.FLYING_SPEED, 0.6)
+            .add(Attributes.STEP_HEIGHT, 1.5)
             .add(Attributes.FOLLOW_RANGE, 40.0)
             .add(Attributes.CAMERA_DISTANCE, 10.0);
     }
@@ -271,7 +279,11 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
         this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0, 12.0F, 4.0F));
         this.goalSelector.addGoal(4, new BreedGoal(this, 1.0));
         this.goalSelector.addGoal(5, new MoveTowardsRestrictionGoal(this, 1.0));
-        this.goalSelector.addGoal(6, new WaterAvoidingRandomFlyingGoal(this, 1.0));
+        // Passeia mais vezes a pé e de vez em quando levanta voo.
+        this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.6));
+        WaterAvoidingRandomFlyingGoal fly = new WaterAvoidingRandomFlyingGoal(this, 1.0);
+        fly.setInterval(400);
+        this.goalSelector.addGoal(6, fly);
         this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 16.0F));
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 
@@ -365,8 +377,15 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
         if ((this.breathTicks & 1) == 0) {
             Vec3 mid = mouth.add(dir.scale(BREATH_RANGE * 0.5));
             double spread = BREATH_RANGE * 0.2;
-            level.sendParticles(variant.breathParticle, mid.x, mid.y, mid.z, 24,
-                Math.abs(dir.x) * spread + 0.5, Math.abs(dir.y) * spread + 0.5, Math.abs(dir.z) * spread + 0.5, 0.02);
+            double sx = Math.abs(dir.x) * spread + 0.5;
+            double sy = Math.abs(dir.y) * spread + 0.5;
+            double sz = Math.abs(dir.z) * spread + 0.5;
+            // Todos deitam fogo; a partícula própria da variante marca o efeito secundário.
+            SimpleParticleType fire = variant == DragonVariant.NETHER_ELDER ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.FLAME;
+            level.sendParticles(fire, mid.x, mid.y, mid.z, 20, sx, sy, sz, 0.02);
+            if (variant.breathParticle != fire) {
+                level.sendParticles(variant.breathParticle, mid.x, mid.y, mid.z, 8, sx, sy, sz, 0.02);
+            }
         }
         if (this.breathTicks % 5 != 0) {
             return;
@@ -472,6 +491,10 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
     @Override
     protected Vec3 getRiddenInput(Player controller, Vec3 selfInput) {
         float strafe = controller.xxa * 0.6F;
+        if (this.onGround() && !controller.isJumping()) {
+            // No chão anda: ignora a inclinação da câmara; saltar (espaço) levanta voo.
+            return new Vec3(strafe, 0.0, controller.zza < 0.0F ? controller.zza * 0.5F : controller.zza);
+        }
         float forward = 0.0F;
         float up = 0.0F;
         if (controller.zza != 0.0F) {
@@ -512,7 +535,12 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
     public void travel(Vec3 input) {
         if (this.getControllingPassenger() instanceof Player) {
             float accel = RIDDEN_FLY_ACCEL * this.getVariant().powerMultiplier;
-            if (this.isExhausted()) {
+            if (this.onGround() && input.y <= 0.0) {
+                this.setNoGravity(false);
+                this.moveRelative(RIDDEN_WALK_ACCEL, input);
+                this.move(net.minecraft.world.entity.MoverType.SELF, this.getDeltaMovement());
+                this.setDeltaMovement(this.getDeltaMovement().multiply(GROUND_FRICTION, 0.98, GROUND_FRICTION).add(0.0, -0.08, 0.0));
+            } else if (this.isExhausted()) {
                 this.setNoGravity(false);
                 this.moveRelative(accel * 0.5F, input);
                 this.move(net.minecraft.world.entity.MoverType.SELF, this.getDeltaMovement());
