@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "drakebound:block/dragon_skull"
+    },
+    "facing=east": {
+      "model": "drakebound:block/dragon_skull",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "drakebound:block/dragon_skull",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "drakebound:block/dragon_skull",
+      "y": 270
+    }
+  }
+}

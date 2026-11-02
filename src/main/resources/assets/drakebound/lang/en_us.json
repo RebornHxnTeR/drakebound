@@ -58,5 +58,8 @@
   "item.drakebound.ender_dragon_chestplate": "Ender Dragon Chestplate",
   "item.drakebound.ender_dragon_leggings": "Ender Dragon Leggings",
   "item.drakebound.ender_dragon_boots": "Ender Dragon Boots",
-  "block.drakebound.carrion_block": "Carrion Block"
+  "block.drakebound.carrion_block": "Carrion Block",
+  "block.drakebound.dragon_bone_block": "Dragon Bone Block",
+  "item.drakebound.dragon_bone": "Dragon Bone",
+  "block.drakebound.dragon_skull": "Dragon Skull"
 }

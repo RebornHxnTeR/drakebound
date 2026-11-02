@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "drakebound:dragon_bone_block"
+  ],
+  "result": {
+    "id": "drakebound:dragon_bone",
+    "count": 9
+  }
+}

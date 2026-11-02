@@ -240,7 +240,8 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
     @Override
     public @Nullable SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason, @Nullable SpawnGroupData groupData) {
         this.setMale(level.getRandom().nextBoolean());
-        return super.finalizeSpawn(level, difficulty, reason, groupData);
+        // Nunca aparecem crias no mundo: só nascem de ovos chocados.
+        return super.finalizeSpawn(level, difficulty, reason, groupData != null ? groupData : new AgeableMob.AgeableMobGroupData(false));
     }
 
     @Override

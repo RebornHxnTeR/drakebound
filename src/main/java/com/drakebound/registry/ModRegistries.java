@@ -2,6 +2,7 @@ package com.drakebound.registry;
 
 import com.drakebound.Drakebound;
 import com.drakebound.block.DragonEggBlock;
+import com.drakebound.block.DragonSkullBlock;
 import com.drakebound.entity.DragonEntity;
 import com.drakebound.entity.DragonVariant;
 import com.drakebound.entity.SaddleType;
@@ -18,6 +19,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.component.TypedEntityData;
 import net.minecraft.world.item.BlockItem;
@@ -30,6 +32,7 @@ import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
@@ -66,6 +69,17 @@ public final class ModRegistries {
     public static final DeferredBlock<Block> CARRION_BLOCK = BLOCKS.registerSimpleBlock("carrion_block",
         p -> p.mapColor(MapColor.COLOR_RED).strength(0.8F).sound(SoundType.SLIME_BLOCK));
     public static final DeferredItem<BlockItem> CARRION_BLOCK_ITEM = ITEMS.registerSimpleBlockItem(CARRION_BLOCK);
+
+    /** Bloco de osso de dragão: 9 ossos; forma os esqueletos dos ninhos abandonados e partido devolve os 9 ossos. */
+    public static final DeferredBlock<RotatedPillarBlock> DRAGON_BONE_BLOCK = BLOCKS.registerBlock("dragon_bone_block", RotatedPillarBlock::new,
+        p -> p.mapColor(MapColor.COLOR_GRAY).strength(2.0F).requiresCorrectToolForDrops().sound(SoundType.BONE_BLOCK));
+    public static final DeferredItem<BlockItem> DRAGON_BONE_BLOCK_ITEM = ITEMS.registerSimpleBlockItem(DRAGON_BONE_BLOCK);
+    public static final DeferredItem<Item> DRAGON_BONE = ITEMS.registerSimpleItem("dragon_bone", p -> p.rarity(Rarity.UNCOMMON));
+    /** Crânio de dragão: fica no lugar da cabeça do esqueleto; pousa-se como bloco ou usa-se na cabeça. */
+    public static final DeferredBlock<DragonSkullBlock> DRAGON_SKULL = BLOCKS.registerBlock("dragon_skull", DragonSkullBlock::new,
+        p -> p.mapColor(MapColor.COLOR_GRAY).strength(1.5F).sound(SoundType.BONE_BLOCK).noOcclusion());
+    public static final DeferredItem<BlockItem> DRAGON_SKULL_ITEM = ITEMS.registerSimpleBlockItem(DRAGON_SKULL,
+        p -> p.rarity(Rarity.EPIC).equippable(EquipmentSlot.HEAD));
 
     public static final Map<DragonVariant, DeferredBlock<DragonEggBlock>> EGG_BLOCKS = new EnumMap<>(DragonVariant.class);
     public static final Map<DragonVariant, DeferredItem<BlockItem>> EGG_ITEMS = new EnumMap<>(DragonVariant.class);
@@ -130,6 +144,9 @@ public final class ModRegistries {
                 EGG_ITEMS.values().forEach(output::accept);
                 output.accept(SCORCHED_EARTH_ITEM);
                 output.accept(CARRION_BLOCK_ITEM);
+                output.accept(DRAGON_BONE_BLOCK_ITEM);
+                output.accept(DRAGON_BONE);
+                output.accept(DRAGON_SKULL_ITEM);
                 SCALES.values().forEach(output::accept);
                 output.accept(SADDLE);
                 output.accept(DOUBLE_SADDLE);

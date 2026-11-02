@@ -2,6 +2,7 @@ package com.drakebound.world;
 
 import com.drakebound.Drakebound;
 import com.drakebound.block.DragonEggBlock;
+import com.drakebound.block.DragonSkullBlock;
 import com.drakebound.entity.DragonEntity;
 import com.drakebound.entity.DragonVariant;
 import com.drakebound.registry.ModRegistries;
@@ -42,7 +43,6 @@ public class DragonNestPiece extends StructurePiece {
     /** Quanto o terreno pode subir ou descer em relação ao centro; colunas fora disto ficam como estão. */
     private static final int SCAN = 12;
     private static final float ABANDONED_CHANCE = 0.2F;
-    private static final BlockState BONE = Blocks.BONE_BLOCK.defaultBlockState();
 
     private final DragonVariant variant;
     private final boolean male;
@@ -92,7 +92,7 @@ public class DragonNestPiece extends StructurePiece {
 
     /** Chão verdadeiro: ignora ar, plantas, neve, folhas e os ossos do esqueleto (para empilhar as costelas). */
     private static boolean isGround(BlockState state) {
-        return !state.canBeReplaced() && !state.is(Blocks.BONE_BLOCK) && !state.is(BlockTags.LEAVES) && !state.is(BlockTags.LOGS) && state.getFluidState().isEmpty();
+        return !state.canBeReplaced() && !state.is(ModRegistries.DRAGON_BONE_BLOCK.get()) && !state.is(BlockTags.LEAVES) && !state.is(BlockTags.LOGS) && state.getFluidState().isEmpty();
     }
 
     /** Altura do chão natural nesta coluna (procura só SCAN blocos acima e abaixo do centro); MIN_VALUE se não houver. */
@@ -126,11 +126,11 @@ public class DragonNestPiece extends StructurePiece {
             return;
         }
         if (!this.male) {
-            this.placeEggsOrHatchling(level, chunkBox, rng);
+            this.placeEggs(level, chunkBox, rng);
         }
         // Entidades só no chunk do centro, para não duplicarem.
         if (chunkBox.isInside(this.center)) {
-            this.spawnDragon(level, this.surface(level, this.center.getX(), this.center.getZ()).above(), rng, this.male, false);
+            this.spawnDragon(level, this.surface(level, this.center.getX(), this.center.getZ()).above(), rng, this.male);
         }
     }
 
@@ -197,8 +197,8 @@ public class DragonNestPiece extends StructurePiece {
     }
 
     /**
-     * Esqueleto de dragão em blocos de osso, deitado no chão do ninho: coluna, costelas, crânio, asas abertas,
-     * patas e cauda. Coordenadas relativas ao centro: s ao longo do corpo, p para o lado, h acima do chão.
+     * Esqueleto de dragão em blocos de osso de dragão, deitado no chão do ninho: coluna, costelas, asas abertas,
+     * patas, cauda e o crânio de dragão. Coordenadas relativas ao centro: s ao longo do corpo, p para o lado, h acima do chão.
      */
     private void placeSkeleton(WorldGenLevel level, BoundingBox chunkBox) {
         boolean alongX = this.roll(this.center.getX(), this.center.getZ(), 3) < 0.5F;
@@ -219,14 +219,10 @@ public class DragonNestPiece extends StructurePiece {
                 this.bone(level, chunkBox, pos, alongX, sign, s, p, 3, side);
             }
         }
-        // Crânio: bloco maciço de 3x3 com testa e focinho.
-        for (int s = 8; s <= 10; s++) {
-            for (int p = -1; p <= 1; p++) {
-                this.bone(level, chunkBox, pos, alongX, sign, s, p, 1, spine);
-            }
-            this.bone(level, chunkBox, pos, alongX, sign, s, 0, 2, spine);
-        }
-        this.bone(level, chunkBox, pos, alongX, sign, 11, 0, 1, spine);
+        // Crânio de dragão na ponta do pescoço, com o focinho virado para fora.
+        Direction facing = alongX ? (sign > 0 ? Direction.EAST : Direction.WEST) : (sign > 0 ? Direction.SOUTH : Direction.NORTH);
+        this.place(level, chunkBox, pos, alongX, sign, 8, 0, 1,
+            ModRegistries.DRAGON_SKULL.get().defaultBlockState().setValue(DragonSkullBlock.FACING, facing));
         // Asas abertas para trás, a partir dos ombros.
         for (int k = 1; k <= 7; k++) {
             for (int p = -1; p <= 1; p += 2) {
@@ -244,6 +240,12 @@ public class DragonNestPiece extends StructurePiece {
 
     private void bone(WorldGenLevel level, BoundingBox chunkBox, BlockPos.MutableBlockPos pos, boolean alongX, int sign,
                       int s, int p, int h, Direction.Axis axis) {
+        this.place(level, chunkBox, pos, alongX, sign, s, p, h, ModRegistries.DRAGON_BONE_BLOCK.get().defaultBlockState()
+            .setValue(RotatedPillarBlock.AXIS, axis));
+    }
+
+    private void place(WorldGenLevel level, BoundingBox chunkBox, BlockPos.MutableBlockPos pos, boolean alongX, int sign,
+                       int s, int p, int h, BlockState state) {
         int x = this.center.getX() + (alongX ? s * sign : p);
         int z = this.center.getZ() + (alongX ? p : s * sign);
         if (!chunkBox.isInside(x, this.center.getY(), z)) {
@@ -253,7 +255,7 @@ public class DragonNestPiece extends StructurePiece {
         if (ground == Integer.MIN_VALUE) {
             return;
         }
-        level.setBlock(pos.set(x, ground + h, z), BONE.setValue(RotatedPillarBlock.AXIS, axis), Block.UPDATE_CLIENTS);
+        level.setBlock(pos.set(x, ground + h, z), state, Block.UPDATE_CLIENTS);
     }
 
     /** Número entre 0 e 1 fixo para cada coluna e canal, igual em qualquer chunk. */
@@ -327,16 +329,12 @@ public class DragonNestPiece extends StructurePiece {
     private static final float NO_EGG_CHANCE = 0.37F;
     private static final float ONE_EGG_CHANCE = 0.97F;
 
-    /** Fêmeas guardam 0 a 2 ovos sobre o magma central (37% / 60% / 3%); 30% das vezes também há uma cria. */
-    private void placeEggsOrHatchling(WorldGenLevel level, BoundingBox chunkBox, RandomSource rng) {
-        boolean hatchling = rng.nextFloat() < 0.3F;
+    /** Fêmeas guardam 0 a 2 ovos sobre o magma central (37% / 60% / 3%). Não nascem crias no mundo: só de ovos chocados. */
+    private void placeEggs(WorldGenLevel level, BoundingBox chunkBox, RandomSource rng) {
         float roll = rng.nextFloat();
         int eggs = roll < NO_EGG_CHANCE ? 0 : roll < ONE_EGG_CHANCE ? 1 : 2;
         if (!chunkBox.isInside(this.center)) {
             return;
-        }
-        if (hatchling) {
-            this.spawnDragon(level, this.surface(level, this.center.getX() + 2, this.center.getZ() + 2).above(), rng, rng.nextBoolean(), true);
         }
         DragonEggBlock egg = ModRegistries.EGG_BLOCKS.get(this.variant).get();
         // Posições fixas e distintas para os dois ovos não caírem no mesmo bloco.
@@ -348,7 +346,7 @@ public class DragonNestPiece extends StructurePiece {
         }
     }
 
-    private void spawnDragon(WorldGenLevel level, BlockPos pos, RandomSource rng, boolean male, boolean baby) {
+    private void spawnDragon(WorldGenLevel level, BlockPos pos, RandomSource rng, boolean male) {
         DragonEntity dragon = ModRegistries.DRAGON.get().create(level.getLevel(), EntitySpawnReason.STRUCTURE);
         if (dragon == null) {
             return;
@@ -357,9 +355,6 @@ public class DragonNestPiece extends StructurePiece {
         dragon.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), EntitySpawnReason.STRUCTURE, null);
         dragon.setVariant(this.variant);
         dragon.setMale(male);
-        if (baby) {
-            dragon.setAge(DragonEntity.BABY_START_AGE);
-        }
         dragon.setHomeTo(this.center, DragonEntity.NEST_RADIUS);
         dragon.setPersistenceRequired();
         level.addFreshEntityWithPassengers(dragon);

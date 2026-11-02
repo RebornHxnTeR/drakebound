@@ -58,5 +58,8 @@
   "item.drakebound.ender_dragon_chestplate": "Peitoral de Dragão do Ender",
   "item.drakebound.ender_dragon_leggings": "Calças de Dragão do Ender",
   "item.drakebound.ender_dragon_boots": "Botas de Dragão do Ender",
-  "block.drakebound.carrion_block": "Bloco de Carniça"
+  "block.drakebound.carrion_block": "Bloco de Carniça",
+  "block.drakebound.dragon_bone_block": "Bloco de Ossos de Dragão",
+  "item.drakebound.dragon_bone": "Osso de Dragão",
+  "block.drakebound.dragon_skull": "Crânio de Dragão"
 }
