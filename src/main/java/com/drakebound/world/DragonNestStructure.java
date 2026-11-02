@@ -46,7 +46,8 @@ public class DragonNestStructure extends Structure {
         }
     }
 
-    private static final int MAX_SLOPE = 24;
+    private static final int MAX_SLOPE = 12;
+    private static final int CLEAR_AIR = 10;
 
     private final DragonVariant variant;
     private final float chance;
@@ -104,8 +105,7 @@ public class DragonNestStructure extends Structure {
         // Ninhos à medida de um dragão do tamanho do Ender Dragon.
         int radius = this.variant.powerMultiplier > 1.2F ? 16 + random.nextInt(3) : 12 + random.nextInt(3);
         if (this.placement == Placement.SURFACE && this.fixedPosition.isEmpty()) {
-            y = this.lowestEdge(context, x, y, z, radius);
-            if (y == Integer.MIN_VALUE) {
+            if (!this.isGentle(context, x, y, z, radius)) {
                 return Optional.empty();
             }
         }
@@ -115,25 +115,20 @@ public class DragonNestStructure extends Structure {
     }
 
     /**
-     * Assenta o ninho no ponto mais baixo da borda (8 amostras): assim nunca fica no ar, e o terreno
-     * mais alto é escavado pela clareira. Em penhascos muito altos sobe um pouco e apoia-se na fundação.
-     * Devolve Integer.MIN_VALUE se o local for rejeitado.
+     * O ninho segue o terreno natural, por isso só se evitam penhascos: 8 amostras na borda,
+     * rejeita se alguma estiver mais de MAX_SLOPE blocos acima ou abaixo do centro.
      */
-    private int lowestEdge(GenerationContext context, int x, int y, int z, int radius) {
-        int low = y;
-        int high = y;
+    private boolean isGentle(GenerationContext context, int x, int y, int z, int radius) {
         for (int i = 0; i < 8; i++) {
             double angle = i * Math.PI / 4.0;
             int sx = x + (int) Math.round(Math.cos(angle) * radius);
             int sz = z + (int) Math.round(Math.sin(angle) * radius);
             int h = context.chunkGenerator().getBaseHeight(sx, sz, Heightmap.Types.WORLD_SURFACE_WG, context.heightAccessor(), context.randomState()) - 1;
-            low = Math.min(low, h);
-            high = Math.max(high, h);
+            if (Math.abs(h - y) > MAX_SLOPE) {
+                return false;
+            }
         }
-        // Em picos íngremes sobe até ficar no máximo MAX_SLOPE abaixo do topo; a fundação (até 24 blocos)
-        // preenche o resto por baixo. Só rejeita se nem assim o ninho ficar apoiado.
-        int base = Math.max(low, high - MAX_SLOPE);
-        return base - low > DragonNestPiece.MAX_FOUNDATION ? Integer.MIN_VALUE : base;
+        return true;
     }
 
     /** Desce pela coluna de ruído até encontrar ar sobre um bloco sólido. Devolve minY-1 se não houver. */
@@ -141,12 +136,16 @@ public class DragonNestStructure extends Structure {
         NoiseColumn column = context.chunkGenerator().getBaseColumn(x, z, context.heightAccessor(), context.randomState());
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(x, 0, z);
         int min = Math.max(this.minY, context.heightAccessor().getMinY() + 1);
+        // Conta o ar seguido por cima: só serve um chão com pelo menos CLEAR_AIR blocos livres para o dragão.
+        int air = 0;
         for (int y = this.maxY; y > min; y--) {
-            if (column.getBlock(y).isAir()) {
-                BlockState below = column.getBlock(y - 1);
-                if (below.isFaceSturdy(EmptyBlockGetter.INSTANCE, pos.setY(y - 1), Direction.UP)) {
-                    return y - 1;
-                }
+            if (!column.getBlock(y).isAir()) {
+                air = 0;
+                continue;
+            }
+            air++;
+            if (air >= CLEAR_AIR && column.getBlock(y - 1).isFaceSturdy(EmptyBlockGetter.INSTANCE, pos.setY(y - 1), Direction.UP)) {
+                return y - 1;
             }
         }
         return context.heightAccessor().getMinY();

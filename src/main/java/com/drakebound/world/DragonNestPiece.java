@@ -11,6 +11,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.RandomizableContainer;
@@ -37,7 +38,8 @@ import net.minecraft.world.level.storage.loot.LootTable;
 public class DragonNestPiece extends StructurePiece {
     /** Espaço livre por cima da plataforma para os dragões se mexerem (também abre a gruta nos ninhos subterrâneos). */
     private static final int CLEAR_HEIGHT = 10;
-    static final int MAX_FOUNDATION = 24;
+    /** Quanto o terreno pode subir ou descer em relação ao centro; colunas fora disto ficam como estão. */
+    private static final int SCAN = 12;
 
     private final DragonVariant variant;
     private final boolean male;
@@ -47,8 +49,8 @@ public class DragonNestPiece extends StructurePiece {
 
     public DragonNestPiece(DragonVariant variant, boolean male, BlockPos center, int radius, long seed) {
         super(ModRegistries.DRAGON_NEST_PIECE.get(), 0, new BoundingBox(
-            center.getX() - radius - 2, center.getY() - 4, center.getZ() - radius - 2,
-            center.getX() + radius + 2, center.getY() + CLEAR_HEIGHT + 2, center.getZ() + radius + 2));
+            center.getX() - radius - 2, center.getY() - SCAN - 1, center.getZ() - radius - 2,
+            center.getX() + radius + 2, center.getY() + SCAN + CLEAR_HEIGHT + 2, center.getZ() + radius + 2));
         this.variant = variant;
         this.male = male;
         this.center = center;
@@ -74,18 +76,33 @@ public class DragonNestPiece extends StructurePiece {
         tag.putLong("seed", this.seed);
     }
 
-    /** Pilares em ruína e enchimento por baixo da plataforma, por variante. */
-    private record Palette(BlockState pillar, BlockState base) {
+    /** Pilares em ruína, por variante. */
+    private static BlockState pillar(DragonVariant variant) {
+        return switch (variant) {
+            case GREEN -> Blocks.MOSSY_COBBLESTONE.defaultBlockState();
+            case YELLOW -> Blocks.COBBLED_DEEPSLATE.defaultBlockState();
+            case RED, GREY -> Blocks.BLACKSTONE.defaultBlockState();
+            case NETHER_ELDER -> Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState();
+            case ENDER -> Blocks.OBSIDIAN.defaultBlockState();
+        };
     }
 
-    private static Palette palette(DragonVariant variant) {
-        return switch (variant) {
-            case GREEN -> new Palette(Blocks.MOSSY_COBBLESTONE.defaultBlockState(), Blocks.DIRT.defaultBlockState());
-            case YELLOW -> new Palette(Blocks.COBBLED_DEEPSLATE.defaultBlockState(), Blocks.STONE.defaultBlockState());
-            case RED, GREY -> new Palette(Blocks.BLACKSTONE.defaultBlockState(), Blocks.DIRT.defaultBlockState());
-            case NETHER_ELDER -> new Palette(Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState(), Blocks.NETHERRACK.defaultBlockState());
-            case ENDER -> new Palette(Blocks.OBSIDIAN.defaultBlockState(), Blocks.END_STONE.defaultBlockState());
-        };
+    /** Chão verdadeiro: ignora ar, plantas, neve e folhas. */
+    private static boolean isGround(BlockState state) {
+        return !state.canBeReplaced() && !state.is(BlockTags.LEAVES) && !state.is(BlockTags.LOGS) && state.getFluidState().isEmpty();
+    }
+
+    /** Altura do chão natural nesta coluna (procura só SCAN blocos acima e abaixo do centro); MIN_VALUE se não houver. */
+    private int groundY(WorldGenLevel level, int x, int z, BlockPos.MutableBlockPos pos) {
+        boolean openAbove = false;
+        for (int y = this.center.getY() + SCAN, min = this.center.getY() - SCAN; y >= min; y--) {
+            boolean ground = isGround(level.getBlockState(pos.set(x, y, z)));
+            if (ground && openAbove) {
+                return y;
+            }
+            openAbove = !ground;
+        }
+        return Integer.MIN_VALUE;
     }
 
     @Override
@@ -94,22 +111,25 @@ public class DragonNestPiece extends StructurePiece {
         RandomSource rng = RandomSource.create(this.seed);
         float phaseA = rng.nextFloat() * Mth.TWO_PI;
         float phaseB = rng.nextFloat() * Mth.TWO_PI;
-        Palette palette = palette(this.variant);
         boolean elder = this.variant.powerMultiplier > 1.0F;
 
-        this.buildPlatform(level, chunkBox, palette, phaseA, phaseB, elder);
-        this.placePillars(level, chunkBox, rng, palette.pillar);
+        this.buildPlatform(level, chunkBox, phaseA, phaseB, elder);
+        this.placePillars(level, chunkBox, rng, pillar(this.variant));
         this.placeChests(level, chunkBox, rng);
         if (!this.male) {
             this.placeEggsOrHatchling(level, chunkBox, rng);
         }
         // Entidades só no chunk do centro, para não duplicarem.
         if (chunkBox.isInside(this.center)) {
-            this.spawnDragon(level, this.center.above(2), rng, this.male, false);
+            this.spawnDragon(level, this.surface(level, this.center.getX(), this.center.getZ()).above(), rng, this.male, false);
         }
     }
 
-    private void buildPlatform(WorldGenLevel level, BoundingBox chunkBox, Palette palette, float phaseA, float phaseB, boolean elder) {
+    /**
+     * O ninho assenta no terreno tal como ele é: em cada coluna só troca o bloco do chão pelos blocos do ninho
+     * e tira plantas, folhas e troncos por cima (até CLEAR_HEIGHT), sem paredes, alicerces nem escavações.
+     */
+    private void buildPlatform(WorldGenLevel level, BoundingBox chunkBox, float phaseA, float phaseB, boolean elder) {
         BlockState scorched = ModRegistries.SCORCHED_EARTH.get().defaultBlockState();
         BlockState magma = Blocks.MAGMA_BLOCK.defaultBlockState();
         BlockState air = Blocks.AIR.defaultBlockState();
@@ -129,21 +149,23 @@ public class DragonNestPiece extends StructurePiece {
                 if (dist > edge) {
                     continue;
                 }
-                // Tigela: o centro fica um bloco abaixo e a borda um bloco acima.
-                float t = dist / edge;
-                int y = this.center.getY() + (t < 0.35F ? -1 : t > 0.85F ? 1 : 0);
+                int y = this.groundY(level, x, z, pos);
+                if (y == Integer.MIN_VALUE) {
+                    continue;
+                }
                 for (int dy = 1; dy <= CLEAR_HEIGHT; dy++) {
-                    level.setBlock(pos.set(x, y + dy, z), air, Block.UPDATE_CLIENTS);
-                }
-                for (int dy = 1; dy <= 3; dy++) {
-                    level.setBlock(pos.set(x, y - dy, z), palette.base, Block.UPDATE_CLIENTS);
-                }
-                // Alicerce: continua para baixo até tocar no chão, para o ninho nunca ficar a flutuar.
-                for (int dy = 4; dy <= MAX_FOUNDATION && level.getBlockState(pos.set(x, y - dy, z)).canBeReplaced(); dy++) {
-                    level.setBlock(pos, palette.base, Block.UPDATE_CLIENTS);
+                    BlockState above = level.getBlockState(pos.set(x, y + dy, z));
+                    if (above.isAir()) {
+                        break;
+                    }
+                    if (isGround(above) || !above.getFluidState().isEmpty()) {
+                        break;
+                    }
+                    level.setBlock(pos, air, Block.UPDATE_CLIENTS);
                 }
                 BlockState top = Math.abs(dx) <= 1 && Math.abs(dz) <= 1 ? magma : floorBlock(this.roll(x, z, 0), scorched);
                 level.setBlock(pos.set(x, y, z), top, Block.UPDATE_CLIENTS);
+                float t = dist / edge;
                 if (t > 0.35F && t < 0.85F) {
                     BlockState treasure = treasureBlock(this.roll(x, z, 1), this.male, elder);
                     if (treasure != null) {
@@ -152,6 +174,12 @@ public class DragonNestPiece extends StructurePiece {
                 }
             }
         }
+    }
+
+    /** Primeiro bloco livre por cima do chão natural (ou o centro, se a coluna não tiver chão perto). */
+    private BlockPos surface(WorldGenLevel level, int x, int z) {
+        int y = this.groundY(level, x, z, new BlockPos.MutableBlockPos());
+        return new BlockPos(x, y == Integer.MIN_VALUE ? this.center.getY() : y, z);
     }
 
     /** Número entre 0 e 1 fixo para cada coluna e canal, igual em qualquer chunk. */
@@ -193,8 +221,9 @@ public class DragonNestPiece extends StructurePiece {
             if (!chunkBox.isInside(x, this.center.getY(), z)) {
                 continue;
             }
-            for (int dy = 2; dy < 2 + height; dy++) {
-                level.setBlock(pos.set(x, this.center.getY() + dy, z), pillar, Block.UPDATE_CLIENTS);
+            int base = this.surface(level, x, z).getY();
+            for (int dy = 1; dy <= height; dy++) {
+                level.setBlock(pos.set(x, base + dy, z), pillar, Block.UPDATE_CLIENTS);
             }
         }
     }
@@ -208,9 +237,10 @@ public class DragonNestPiece extends StructurePiece {
             float d = this.radius * (0.4F + rng.nextFloat() * 0.3F);
             Direction facing = Direction.Plane.HORIZONTAL.getRandomDirection(rng);
             long lootSeed = rng.nextLong();
-            BlockPos pos = new BlockPos(this.center.getX() + Mth.floor(Mth.cos(angle) * d), this.center.getY() + 1,
-                this.center.getZ() + Mth.floor(Mth.sin(angle) * d));
-            if (chunkBox.isInside(pos)) {
+            int x = this.center.getX() + Mth.floor(Mth.cos(angle) * d);
+            int z = this.center.getZ() + Mth.floor(Mth.sin(angle) * d);
+            if (chunkBox.isInside(x, this.center.getY(), z)) {
+                BlockPos pos = this.surface(level, x, z).above();
                 level.setBlock(pos, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, facing), Block.UPDATE_CLIENTS);
                 if (level.getBlockEntity(pos) instanceof RandomizableContainer container) {
                     container.setLootTable(table, lootSeed);
@@ -232,12 +262,12 @@ public class DragonNestPiece extends StructurePiece {
             return;
         }
         if (hatchling) {
-            this.spawnDragon(level, this.center.offset(2, 1, 2), rng, rng.nextBoolean(), true);
+            this.spawnDragon(level, this.surface(level, this.center.getX() + 2, this.center.getZ() + 2).above(), rng, rng.nextBoolean(), true);
         }
         DragonEggBlock egg = ModRegistries.EGG_BLOCKS.get(this.variant).get();
         // Posições fixas e distintas para os dois ovos não caírem no mesmo bloco.
         for (int i = 0; i < eggs; i++) {
-            BlockPos pos = this.center.offset(i, 0, 0);
+            BlockPos pos = this.surface(level, this.center.getX() + i, this.center.getZ()).above();
             if (level.getBlockState(pos).isAir()) {
                 level.setBlock(pos, egg.defaultBlockState(), Block.UPDATE_CLIENTS);
             }

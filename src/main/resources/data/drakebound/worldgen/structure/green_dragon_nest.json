@@ -3,7 +3,7 @@
   "biomes": "minecraft:lush_caves",
   "step": "surface_structures",
   "spawn_overrides": {},
-  "terrain_adaptation": "beard_box",
+  "terrain_adaptation": "none",
   "variant": "green",
   "chance": 0.25,
   "placement": "floor",
