@@ -1,5 +1,6 @@
 package com.drakebound.client;
 
+import com.drakebound.entity.DragonEntity;
 import com.drakebound.entity.SaddleType;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -26,7 +27,16 @@ public class DrakeModel extends EnderDragonModel {
     private static final float FOLD_TIP_Z = Mth.PI - 0.08F;
     /** Passada: frequência e amplitude (radianos) do balanço das patas. */
     private static final float STEP_FREQ = 0.35F;
-    private static final float STEP_SWING = 0.45F;
+    private static final float STEP_SWING = 0.35F;
+    /** De pé o corpo sobe para as patas esticadas tocarem no chão (unidades do modelo, 16 = 1 bloco). */
+    public static final float STAND_LIFT = DragonEntity.STAND_LIFT_UNITS;
+    /** Pata de trás dobrada em "Z": coxa para a frente, canela para trás, pé assente. */
+    private static final float HIND_BEND = 0.74F;
+    /** Pescoço erguido em curva e cabeça direita. */
+    private static final float[] NECK_STAND = {-0.9F, -0.75F, -0.5F, -0.25F, 0.0F};
+    private static final float HEAD_STAND = 0.15F;
+    private static final float TAIL_DROOP = 0.04F;
+    private static final float SEGMENT = 10.0F;
 
     private final ModelPart saddleFront;
     private final ModelPart saddleBack;
@@ -38,6 +48,13 @@ public class DrakeModel extends EnderDragonModel {
     private final ModelPart rightFrontLeg;
     private final ModelPart leftHindLeg;
     private final ModelPart rightHindLeg;
+    private final ModelPart[] frontTips;
+    private final ModelPart[] frontFeet;
+    private final ModelPart[] hindTips;
+    private final ModelPart[] hindFeet;
+    private final ModelPart[] neck = new ModelPart[5];
+    private final ModelPart[] tail = new ModelPart[12];
+    private final ModelPart head;
 
     public DrakeModel(ModelPart root) {
         super(root);
@@ -52,6 +69,17 @@ public class DrakeModel extends EnderDragonModel {
         this.rightFrontLeg = body.getChild("right_front_leg");
         this.leftHindLeg = body.getChild("left_hind_leg");
         this.rightHindLeg = body.getChild("right_hind_leg");
+        this.frontTips = new ModelPart[]{this.leftFrontLeg.getChild("left_front_leg_tip"), this.rightFrontLeg.getChild("right_front_leg_tip")};
+        this.frontFeet = new ModelPart[]{this.frontTips[0].getChild("left_front_foot"), this.frontTips[1].getChild("right_front_foot")};
+        this.hindTips = new ModelPart[]{this.leftHindLeg.getChild("left_hind_leg_tip"), this.rightHindLeg.getChild("right_hind_leg_tip")};
+        this.hindFeet = new ModelPart[]{this.hindTips[0].getChild("left_hind_foot"), this.hindTips[1].getChild("right_hind_foot")};
+        for (int i = 0; i < this.neck.length; i++) {
+            this.neck[i] = root.getChild("neck" + i);
+        }
+        for (int i = 0; i < this.tail.length; i++) {
+            this.tail[i] = root.getChild("tail" + i);
+        }
+        this.head = root.getChild("head");
     }
 
     /** Modelo que só desenha as selas (o resto continua a ser posicionado, mas não é desenhado). */
@@ -106,12 +134,61 @@ public class DrakeModel extends EnderDragonModel {
             this.rightWing.zRot = -this.leftWing.zRot;
             this.rightWingTip.zRot = -this.leftWingTip.zRot;
 
+            this.standPose(ground);
             // Patas: diagonais alternadas (frente-esquerda com trás-direita), como um quadrúpede.
             float swing = Mth.sin(drake.walkPos * STEP_FREQ) * STEP_SWING * Math.min(1.0F, drake.walkSpeed * 2.0F) * ground;
             this.leftFrontLeg.xRot += swing;
             this.rightHindLeg.xRot += swing;
             this.rightFrontLeg.xRot -= swing;
             this.leftHindLeg.xRot -= swing;
+        }
+    }
+
+    /** Mistura a pose de voo (do Ender Dragon) com a pose de pé: patas por baixo do corpo, pescoço erguido. */
+    private void standPose(float ground) {
+        this.root.y -= STAND_LIFT * ground;
+        this.leftFrontLeg.xRot = Mth.lerp(ground, this.leftFrontLeg.xRot, 0.0F);
+        this.rightFrontLeg.xRot = this.leftFrontLeg.xRot;
+        this.leftHindLeg.xRot = Mth.lerp(ground, this.leftHindLeg.xRot, -HIND_BEND);
+        this.rightHindLeg.xRot = this.leftHindLeg.xRot;
+        for (int i = 0; i < 2; i++) {
+            this.frontTips[i].xRot = Mth.lerp(ground, this.frontTips[i].xRot, 0.0F);
+            this.frontFeet[i].xRot = Mth.lerp(ground, this.frontFeet[i].xRot, 0.0F);
+            this.hindTips[i].xRot = Mth.lerp(ground, this.hindTips[i].xRot, 2.0F * HIND_BEND);
+            this.hindFeet[i].xRot = Mth.lerp(ground, this.hindFeet[i].xRot, -HIND_BEND);
+        }
+        // Pescoço: o modelo encadeia as posições a partir das rotações, por isso recalcula-se a cadeia.
+        float x = this.neck[0].x;
+        float y = this.neck[0].y;
+        float z = this.neck[0].z;
+        for (int i = 0; i < this.neck.length; i++) {
+            ModelPart part = this.neck[i];
+            part.xRot = Mth.lerp(ground, part.xRot, NECK_STAND[i]);
+            part.x = x;
+            part.y = y;
+            part.z = z;
+            x -= Mth.sin(part.yRot) * Mth.cos(part.xRot) * SEGMENT;
+            y += Mth.sin(part.xRot) * SEGMENT;
+            z -= Mth.cos(part.yRot) * Mth.cos(part.xRot) * SEGMENT;
+        }
+        this.head.x = x;
+        this.head.y = y;
+        this.head.z = z;
+        this.head.xRot = Mth.lerp(ground, this.head.xRot, HEAD_STAND);
+        // Cauda: desce um pouco em direção ao chão.
+        x = this.tail[0].x;
+        y = this.tail[0].y;
+        z = this.tail[0].z;
+        float droop = 0.0F;
+        for (ModelPart part : this.tail) {
+            droop += TAIL_DROOP * ground;
+            part.xRot += droop;
+            part.x = x;
+            part.y = y;
+            part.z = z;
+            y += Mth.sin(part.xRot) * SEGMENT;
+            z -= Mth.cos(part.yRot) * Mth.cos(part.xRot) * SEGMENT;
+            x -= Mth.sin(part.yRot) * Mth.cos(part.xRot) * SEGMENT;
         }
     }
 }

@@ -112,6 +112,8 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
     public final DragonFlightHistory flightHistory = new DragonFlightHistory();
     public float flapTime;
     public float oFlapTime;
+    /** Quanto o modelo sobe quando está de pé (unidades do modelo; 16 = 1 bloco). */
+    public static final float STAND_LIFT_UNITS = 27.0F;
     /** 0 = a voar, 1 = pousado; suavizado para o modelo não saltar entre poses (só cliente). */
     public float groundAmount;
     public float oGroundAmount;
@@ -610,7 +612,9 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
     protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float scale) {
         int index = Math.max(0, this.getPassengers().indexOf(passenger));
         double z = index == 0 ? dimensions.width() * 0.15 : -dimensions.width() * 0.35;
-        return new Vec3(0.0, dimensions.height() * 0.85, z).yRot(-this.getYRot() * Mth.DEG_TO_RAD);
+        // De pé o modelo sobe (patas esticadas), por isso a sela também.
+        double lift = STAND_LIFT_UNITS / 16.0 * this.getAgeScale() * this.standAmount();
+        return new Vec3(0.0, dimensions.height() * 0.85 + lift, z).yRot(-this.getYRot() * Mth.DEG_TO_RAD);
     }
 
     @Override
@@ -792,6 +796,11 @@ public class DragonEntity extends TamableAnimal implements FlyingAnimal {
         if (this.getSaddle() != SaddleType.NONE) {
             this.spawnAtLocation(level, new ItemStack(ModRegistries.saddleItem(this.getSaddle())));
         }
+    }
+
+    /** 0 a voar, 1 de pé: no cliente suavizado, no servidor direto. */
+    public float standAmount() {
+        return this.level().isClientSide() ? this.groundAmount : this.onGround() || this.isInSittingPose() ? 1.0F : 0.0F;
     }
 
     private void cycleCommand(Player player) {
