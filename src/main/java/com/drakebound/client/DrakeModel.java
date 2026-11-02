@@ -31,7 +31,10 @@ public class DrakeModel extends EnderDragonModel {
     /** De pé o corpo sobe para as patas esticadas tocarem no chão (unidades do modelo, 16 = 1 bloco). */
     public static final float STAND_LIFT = DragonEntity.STAND_LIFT_UNITS;
     /** Pata de trás dobrada em "Z": coxa para a frente, canela para trás, pé assente. */
-    private static final float HIND_BEND = 0.74F;
+    private static final float HIND_BEND = 0.41F;
+    /** Patas de trás mais pequenas e patas da frente mais grossas (proporções de quadrúpede). */
+    private static final float HIND_SCALE = 0.8F;
+    private static final float FRONT_THICKNESS = 1.4F;
     /** Pescoço erguido em curva e cabeça direita. */
     private static final float[] NECK_STAND = {-0.9F, -0.75F, -0.5F, -0.25F, 0.0F};
     private static final float HEAD_STAND = 0.15F;
@@ -119,6 +122,10 @@ public class DrakeModel extends EnderDragonModel {
             this.saddleBack.visible = false;
             return;
         }
+        this.leftHindLeg.xScale = this.leftHindLeg.yScale = this.leftHindLeg.zScale = HIND_SCALE;
+        this.rightHindLeg.xScale = this.rightHindLeg.yScale = this.rightHindLeg.zScale = HIND_SCALE;
+        this.leftFrontLeg.xScale = this.leftFrontLeg.zScale = FRONT_THICKNESS;
+        this.rightFrontLeg.xScale = this.rightFrontLeg.zScale = FRONT_THICKNESS;
         this.saddleFront.visible = drake.saddle != SaddleType.NONE;
         this.saddleBack.visible = drake.saddle == SaddleType.DOUBLE;
 
